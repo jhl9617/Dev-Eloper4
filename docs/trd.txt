@@ -1,0 +1,145 @@
+Technical Requirements Document (TRD)
+1. Executive Technical Summary
+Project Overview: Deliver a self-hosted, SEO-optimized blog platform where one administrator can author Markdown posts through a secure dashboard while readers enjoy fast, responsive browsing with light/dark theming.
+Core Technology Stack: Next.js (App Router, React 18, TypeScript), Supabase (PostgreSQL, Auth, Storage), Tailwind CSS, shadcn-ui, TipTap, Vercel.
+Key Technical Objectives:
+Time To First Byte < 200 ms (CDN-backed SSR/SSG)
+Largest Contentful Paint ≤ 1.5 s P75
+Admin publication flow ≤ 5 min
+≥ 99.9 % uptime (Supabase + Vercel SLA)
+Critical Technical Assumptions:
+Single-admin model (no multi-tenant complexity)
+Traffic fits within free/entry-level tiers during first twelve months
+Supabase scaling automatically covers 10k concurrent reads without manual sharding
+2. Tech Stack
+Category	Technology / Library	Reasoning (Why it's chosen for this project)
+Frontend Framework	Next.js 14 (App Router)	Out-of-the-box SSR/SSG, file-based routing, edge ISR, Vercel native deployment.
+Language & Typing	TypeScript	Compile-time safety, IDE support, wide adoption in React ecosystem.
+Styling	Tailwind CSS	Utility-first, fast theming (light/dark) with minimal custom CSS.
+UI Components	shadcn-ui	Accessible, unstyled primitives that pair well with Tailwind.
+State Management	zustand	Tiny footprint, avoids Redux boilerplate; adequate for small app state.
+Form Handling	react-hook-form + zod	Performant uncontrolled inputs with schema validation.
+Content Editor	TipTap (Markdown mode)	Modern WYSIWYG/Markdown hybrid; extensible image upload hooks.
+Authentication / BaaS	Supabase Auth	Managed JWT auth, Row Level Security, email/OAuth ready.
+Database	Supabase PostgreSQL	Relational, full-text search, free tier backups, SQL familiarly.
+Storage & CDN	Supabase Storage	Direct image uploads with automatic global CDN URLs.
+Hosting / CDN	Vercel	Zero-config Next.js hosting, preview URLs per PR, edge network.
+Analytics	Plausible (cookie-less)	Lightweight, privacy-focused metrics aligned with European regulations.
+Icons	lucide-react	Open-source icon set, tree-shakable.
+Linting & Formatting	ESLint (next), Prettier	Enforce code quality, consistent formatting.
+Testing	Jest + React Testing Library (unit)	Familiar toolchain, minimal config for component tests.
+CI/CD	GitHub Actions	Free minutes, easy integration for lint/test/build pipeline.
+Comments (optional)	Giscus	GitHub-based comments toggled via config flag; no backend maintenance.
+SEO Utilities	next-sitemap, Open Graph tags	Automated sitemaps, social previews for better discoverability.
+Date Utilities	date-fns	Small footprint, immutable helpers.
+3. System Architecture Design
+Top-Level Building Blocks
+Web Client (Next.js)
+Pages (Home, Post, Tag, Category, Search, About)
+Admin dashboard (editor, post list, analytics)
+Supabase Backend
+Auth (JWT, RLS policies)
+PostgreSQL DB (posts, tags, views)
+Storage (images)
+Edge Functions (optional: nightly RSS generation)
+CDN & Hosting
+Vercel Edge Network for static/SSR pages
+Supabase CDN for images
+Third-Party Services
+Plausible (analytics)
+Giscus (comments, toggled)
+Top-Level Component Interaction Diagram
+graph TD
+    A[Browser] -->|HTTPS| B[Next.js App (Vercel Edge)]
+    B -->|REST/GraphQL over HTTPS| C[Supabase API]
+    C --> D[PostgreSQL]
+    C --> E[Storage (Images)]
+    B --> F[Plausible Analytics]
+    B --Comments (optional)--> G[Giscus]
+Diagram description:
+
+Browser requests pages; Vercel serves SSG/SSR responses.
+Next.js fetches data via Supabase client SDK (row-level policy enforced).
+Supabase proxies to PostgreSQL for data and to Storage for image objects.
+Analytics events sent directly from client to Plausible.
+If enabled, comment widget communicates with GitHub via Giscus.
+Code Organization & Convention
+Domain-Driven Organization Strategy
+
+Domains: auth, content, taxonomy, analytics, settings.
+Layers: UI (components/pages), Application (hooks, services), Infrastructure (supabase, analytics).
+Universal File & Folder Structure
+
+/
+├── prisma/                  # DB schema & migrations (optional)
+├── scripts/                 # one-off utilities (e.g., RSS generator)
+├── src/
+│   ├── app/                 # Next.js App Router
+│   │   ├── (public pages)/
+│   │   ├── dashboard/       # admin routes (protected)
+│   │   └── sitemap.xml/route.ts
+│   ├── components/
+│   │   ├── ui/              # shadcn components
+│   │   └── shared/          # site-wide widgets (navbar, footer, etc.)
+│   ├── features/
+│   │   ├── auth/
+│   │   ├── content/
+│   │   ├── taxonomy/
+│   │   └── analytics/
+│   ├── hooks/
+│   ├── lib/                 # supabase client, markdown utils, SEO helpers
+│   ├── constants/
+│   ├── store/               # zustand slices
+│   └── types/
+├── public/                  # static assets
+├── .github/workflows/       # CI pipelines
+└── package.json
+Data Flow & Communication Patterns
+Client-Server Communication: Supabase JS client uses HTTPS REST (authenticated with JWT) for CRUD and full-text search; ISR revalidates pages on demand.
+Database Interaction: PostgreSQL accessed via Supabase RPC/select; Prisma optional for type-safe queries in edge functions.
+External Service Integration: Plausible script loaded in <Head>; outbound events batched.
+Real-Time Communication: Not required; live preview relies on local state.
+Data Synchronization: ISR + client revalidation ensures consistency between published content and cached pages.
+4. Performance & Optimization Strategy
+Leverage Incremental Static Regeneration for posts/home to serve from edge cache with near-real-time updates.
+Lazy-load images with next/image + native browser loading="lazy"; serve optimized formats (WebP/AVIF).
+Bundle splitting & tree-shaking: keep JS payload < 150 kB by importing TipTap extensions on demand.
+Use Supabase row-level policies to push auth filtering server side, reducing over-the-wire payload.
+5. Implementation Roadmap & Milestones
+Phase 1: Foundation (MVP Implementation) – Weeks 1-4
+Repository bootstrap, CI pipeline, Vercel & Supabase projects
+Auth flow, protected dashboard route
+Post CRUD with Markdown editor & image upload
+Home & Post pages (SSR/SSG), basic SEO tags
+Baseline security (HTTPS, RLS, XSS sanitation)
+Phase 2: Feature Enhancement – Weeks 5-7
+Tag & category management with filtering pages
+Full-text search with debounce
+Light/dark mode, responsive design finishing
+Visitor counter & simple analytics dashboard
+Lighthouse CI integration
+Phase 3: Scaling & Optimization – Weeks 8-10
+RSS feed generation via edge function or script
+Optional comments toggle (Giscus)
+Performance tuning (bundle analysis, caching headers)
+Daily DB backup automation to S3
+Pre-launch QA, accessibility audit, content seeding
+6. Risk Assessment & Mitigation Strategies
+Technical Risk Analysis
+Technology Risks: Next.js or Supabase major version changes
+Mitigation: lock minor versions; monthly dependency review.
+Performance Risks: Large images slowing LCP
+Mitigation: enforce 1 MB upload limit; automatic image resizing on upload.
+Security Risks: XSS in Markdown content
+Mitigation: remark-sanitize, CSP headers.
+Integration Risks: Third-party service outage (Plausible, Giscus)
+Mitigation: Fail-soft (non-blocking script), feature flag toggle.
+Project Delivery Risks
+Timeline Risks: Slip due to unfamiliar TipTap configuration
+Mitigation: allocate spike day, reuse community starter kit.
+Resource Risks: Single developer bandwidth
+Mitigation: prioritize MVP scope; automate tests and CI.
+Quality Risks: Low test coverage leading to regressions
+Mitigation: enforce unit tests on critical utilities & components.
+Deployment Risks: Supabase region latency
+Mitigation: choose same region as Vercel; fallback to edge cache.

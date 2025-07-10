@@ -1,0 +1,105 @@
+Product Requirements Document
+
+1. Executive Summary
+   Build a modern, responsive blog web application that allows a single administrator to create, manage, and publish Markdown-based articles while offering visitors an elegant reading and discovery experience comparable to services such as Tistory, Naver Blog, and Velog.
+
+2. Problem Statement
+   Independent writers often rely on large blogging platforms that restrict design, ownership, or monetization options. A lightweight, self-hosted solution with an intuitive editor, robust search, and professional presentation is needed to empower authors while delivering fast, SEO-friendly content to readers.
+
+3. Goals and Objectives
+   Primary Goal: Enable the admin to quickly publish and maintain high-quality blog posts through an easy, secure interface.
+   Secondary Goals:
+   Deliver seamless reading, filtering, and sharing for visitors.
+   Provide a stylish, responsive UI supporting light/dark modes.
+   Optimize SEO and performance for organic traffic growth.
+   Success Metrics:
+   Admin time to publish new post <5 min.
+   ≥1,000 monthly unique visitors within 3 months of launch.
+   Average page load ≤1 s (LCP 1.5 s P75).
+   Bounce rate <50 %, repeat visitor rate >25 %.
+4. Target Audience
+   Primary Users
+   Individual content creators, developers, designers, and hobby bloggers (age 20-45) seeking ownership of their content, basic analytics, and custom styling without heavy CMS overhead.
+   Secondary Users
+   Readers interested in the blog’s domain topics, recruiters assessing author expertise, and partners sharing posts.
+5. User Stories
+   As an admin, I want to log in securely so that only I can edit content.
+   As an admin, I want a Markdown editor with image upload so that I can format posts easily.
+   As an admin, I want to add tags and categories so that posts are organized.
+   As a visitor, I want to browse the latest posts on the home page so that I discover new content quickly.
+   As a visitor, I want to click a tag to see all related posts so that I can deep-dive into a topic.
+   As a visitor, I want to search by title or tag so that I find specific information fast.
+   As a visitor, I want to switch to dark mode so that I can read comfortably at night.
+   As a visitor, I want to copy a share link so that I can post articles on social media.
+6. Functional Requirements
+   Core Features
+   Admin Authentication
+
+Single admin account via Supabase Auth (Email/Password or OAuth).
+JWT session stored in http-only cookies; auto-refresh tokens.
+Content Management
+
+CRUD for posts using a Markdown WYSIWYG editor (e.g., TipTap, Toast UI).
+Image upload to Supabase Storage or AWS S3 with automatic CDN URLs.
+Tag autocomplete (fuzzy search) and category selection/creation.
+Draft / Publish status, slug auto-generation, and preview mode.
+Acceptance: Admin can create a post with at least one image, save as draft, publish, then view it publicly.
+Public Blog Pages
+
+Home: intro banner + paginated latest posts.
+Post Detail: lazy-loaded images, code syntax highlighting, social share button.
+Category & Tag Pages: server-side filtered lists.
+Search: title + tag full-text search with debounce (≤300 ms).
+Routing via Next.js App Router with SEO-friendly dynamic paths.
+Visitor Interactions
+
+Light/Dark mode toggle (prefers-color-scheme default).
+Optional comments (config flag; default off) via third-party widget (e.g., Giscus).
+Visitor counter (unique page views per post).
+RSS 2.0 feed (auto-generated nightly).
+Supporting Features
+About/Profile page with avatar, bio, external links.
+Open Graph & Twitter meta tags per post.
+404 and 500 custom error pages.
+Admin dashboard analytics: total posts, monthly views, top tags. 7. Non-Functional Requirements
+Performance: SSR or SSG with CDN; TTFB <200 ms, CLS <0.1.
+Security: OWASP Top-10 compliance, HTTPS only, XSS sanitation on Markdown.
+Usability: WCAG 2.1 AA contrast, keyboard navigation.
+Scalability: Horizontal scaling via Vercel or Netlify; Supabase scales to 10k concurrent reads.
+Compatibility: Latest 2 versions of Chrome, Safari, Firefox, Edge; mobile Safari iOS 15+. 8. Technical Considerations
+Frontend Framework: Next.js (App Router, React 18)
+Language & Typing: TypeScript (type safety, maintainability)
+Styling: Tailwind CSS (utility-first), shadcn-ui (accessible prebuilt UI components)
+State & Data Management: zustand (global state), react-hook-form (form state/validation), zod (schema validation/data integrity), supabase (BaaS: auth/DB/storage)
+Utilities & Libraries: date-fns (date/time), ts-pattern (pattern matching), es-toolkit (utility functions), lucide-react (icons), react-use (common hooks)
+Build & Dev Tools: ESLint (linting), PostCSS (CSS post-processing), Next.js built-in dev server
+Directory Structure: src/app (App Router), src/components/ui (shadcn-ui), src/constants, src/hooks, src/lib, src/remote, src/features, etc.
+Miscellaneous: picsum.photos (stock image placeholder), UTF-8 encoding for Korean text support
+Backend: Supabase (PostgreSQL, Auth, Storage) with Row Level Security.
+Image CDN: Supabase or Cloudflare Images.
+Deployment: Vercel (preview builds per PR, production main branch).
+CI/CD: GitHub Actions for lint, tests, schema migration (Prisma).
+Analytics: Plausible or Simple Analytics (cookie-less).
+SEO: next-sitemap, structured data JSON-LD.
+Backup: Daily DB dump to S3; versioned image storage.
+3rd-Party Dependencies: TipTap Editor, remark/rehype plugins, Giscus (optional comments). 9. Success Metrics and KPIs
+Content KPIs: Posts published per month, average read time.
+Visitor KPIs: Unique visitors, pages/session, subscriber RSS count.
+Business KPIs: Newsletter signups (if later added), referral traffic growth.
+Technical KPIs: CI pass rate 100 %, uptime ≥99.9 %, average API latency <100 ms. 10. Timeline and Milestones
+Phase 0 (Week 1): Requirements finalization, design system, repo setup.
+Phase 1 – MVP (Weeks 2-5): Auth, post CRUD, home & detail pages, SSG, basic SEO.
+Phase 2 – Usability (Weeks 6-7): Search, tags/categories, dark mode, visitor counter.
+Phase 3 – Growth (Weeks 8-9): RSS feed, about page, OG tags, optional comments.
+Phase 4 – Polish & Launch (Week 10): QA, accessibility audit, content seeding, production release.
+Post-Launch (Week 11+): Analytics review, backlog grooming. 11. Risks and Mitigation
+Data Loss: Mitigate with nightly backups and versioned storage.
+Performance Regression: Integrate Lighthouse CI in PR pipeline.
+Single Admin Account Compromise: Enforce strong password + 2FA; monitor unusual logins.
+Adoption Risk: Market via social platforms and SEO; monitor KPIs, iterate UI.
+Scope Creep: Lock feature list per phase; any new request assessed via Change Control Board. 12. Future Considerations
+Multi-author support with role-based permissions.
+Monetization (ads or subscription).
+Internationalization (i18n) using Next-Intl.
+Static export for offline hosting.
+Mobile app (React Native) consuming the same Supabase backend.

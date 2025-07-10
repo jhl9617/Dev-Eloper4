@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__vooster-ai__connect_project",
+      "Bash(npx @vooster/cli@latest rules:init:*)",
+      "Bash(find:*)",
+      "mcp__vooster-ai__get_next_task",
+      "mcp__vooster-ai__list_task",
+      "mcp__vooster-ai__init_rules",
+      "Bash(rm:*)",
+      "Bash(npm run dev:*)",
+      "Bash(ls:*)"
+    ],
+    "deny": []
+  }
+}
