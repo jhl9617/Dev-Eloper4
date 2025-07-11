@@ -1,159 +1,216 @@
-export interface Database {
+export type PostStatus = 'draft' | 'scheduled' | 'published' | 'archived';
+
+export type Database = {
   public: {
     Tables: {
+      admins: {
+        Row: {
+          user_id: string;
+          added_at: string;
+        };
+        Insert: {
+          user_id: string;
+          added_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          added_at?: string;
+        };
+      };
       posts: {
         Row: {
           id: string;
           created_at: string;
-          updated_at: string | null;
+          updated_at: string;
+          deleted_at: string | null;
+          status: PostStatus;
+          published_at: string | null;
           title: string;
           content: string;
-          excerpt: string | null;
           slug: string;
-          status: 'draft' | 'published' | 'archived';
-          published_at: string | null;
-          cover_image_url: string | null;
           cover_image_path: string | null;
-          category_id: string | null;
-          deleted_at: string | null;
-          search_vector: unknown | null;
+          category_id: number | null;
+          search_vector: unknown;
         };
         Insert: {
           id?: string;
           created_at?: string;
-          updated_at?: string | null;
+          updated_at?: string;
+          deleted_at?: string | null;
+          status?: PostStatus;
+          published_at?: string | null;
           title: string;
           content: string;
-          excerpt?: string | null;
           slug: string;
-          status?: 'draft' | 'published' | 'archived';
-          published_at?: string | null;
-          cover_image_url?: string | null;
           cover_image_path?: string | null;
-          category_id?: string | null;
-          deleted_at?: string | null;
-          search_vector?: unknown | null;
+          category_id?: number | null;
+          search_vector?: unknown;
         };
         Update: {
           id?: string;
           created_at?: string;
-          updated_at?: string | null;
+          updated_at?: string;
+          deleted_at?: string | null;
+          status?: PostStatus;
+          published_at?: string | null;
           title?: string;
           content?: string;
-          excerpt?: string | null;
           slug?: string;
-          status?: 'draft' | 'published' | 'archived';
-          published_at?: string | null;
-          cover_image_url?: string | null;
           cover_image_path?: string | null;
-          category_id?: string | null;
-          deleted_at?: string | null;
-          search_vector?: unknown | null;
+          category_id?: number | null;
+          search_vector?: unknown;
         };
       };
       categories: {
         Row: {
-          id: string;
+          id: number;
           created_at: string;
-          updated_at: string | null;
+          updated_at: string;
+          deleted_at: string | null;
           name: string;
           slug: string;
-          description: string | null;
-          deleted_at: string | null;
         };
         Insert: {
-          id?: string;
+          id?: number;
           created_at?: string;
-          updated_at?: string | null;
+          updated_at?: string;
+          deleted_at?: string | null;
           name: string;
           slug: string;
-          description?: string | null;
-          deleted_at?: string | null;
         };
         Update: {
-          id?: string;
+          id?: number;
           created_at?: string;
-          updated_at?: string | null;
+          updated_at?: string;
+          deleted_at?: string | null;
           name?: string;
           slug?: string;
-          description?: string | null;
-          deleted_at?: string | null;
         };
       };
       tags: {
         Row: {
-          id: string;
+          id: number;
           created_at: string;
-          updated_at: string | null;
+          updated_at: string;
+          deleted_at: string | null;
           name: string;
           slug: string;
-          deleted_at: string | null;
         };
         Insert: {
-          id?: string;
+          id?: number;
           created_at?: string;
-          updated_at?: string | null;
+          updated_at?: string;
+          deleted_at?: string | null;
           name: string;
           slug: string;
-          deleted_at?: string | null;
         };
         Update: {
-          id?: string;
+          id?: number;
           created_at?: string;
-          updated_at?: string | null;
+          updated_at?: string;
+          deleted_at?: string | null;
           name?: string;
           slug?: string;
-          deleted_at?: string | null;
         };
       };
       post_tags: {
         Row: {
           post_id: string;
-          tag_id: string;
+          tag_id: number;
           created_at: string;
         };
         Insert: {
           post_id: string;
-          tag_id: string;
+          tag_id: number;
           created_at?: string;
         };
         Update: {
           post_id?: string;
-          tag_id?: string;
+          tag_id?: number;
           created_at?: string;
         };
       };
-      users: {
+      post_revisions: {
         Row: {
-          id: string;
+          id: number;
+          post_id: string;
+          title: string | null;
+          content: string | null;
           created_at: string;
-          updated_at: string | null;
-          email: string;
-          role: 'admin' | 'user';
-          deleted_at: string | null;
+          created_by: string | null;
         };
         Insert: {
-          id?: string;
+          id?: number;
+          post_id: string;
+          title?: string | null;
+          content?: string | null;
           created_at?: string;
-          updated_at?: string | null;
-          email: string;
-          role?: 'admin' | 'user';
-          deleted_at?: string | null;
+          created_by?: string | null;
         };
         Update: {
-          id?: string;
+          id?: number;
+          post_id?: string;
+          title?: string | null;
+          content?: string | null;
           created_at?: string;
-          updated_at?: string | null;
+          created_by?: string | null;
+        };
+      };
+      security_logs: {
+        Row: {
+          id: number;
+          created_at: string;
+          user_id: string | null;
+          action: string;
+          details: any;
+          ip_address: string | null;
+          user_agent: string | null;
+        };
+        Insert: {
+          id?: number;
+          created_at?: string;
+          user_id?: string | null;
+          action: string;
+          details?: any;
+          ip_address?: string | null;
+          user_agent?: string | null;
+        };
+        Update: {
+          id?: number;
+          created_at?: string;
+          user_id?: string | null;
+          action?: string;
+          details?: any;
+          ip_address?: string | null;
+          user_agent?: string | null;
+        };
+      };
+      login_attempts: {
+        Row: {
+          id: number;
+          created_at: string;
+          email: string;
+          success: boolean;
+          ip_address: string | null;
+          user_agent: string | null;
+        };
+        Insert: {
+          id?: number;
+          created_at?: string;
+          email: string;
+          success?: boolean;
+          ip_address?: string | null;
+          user_agent?: string | null;
+        };
+        Update: {
+          id?: number;
+          created_at?: string;
           email?: string;
-          role?: 'admin' | 'user';
-          deleted_at?: string | null;
+          success?: boolean;
+          ip_address?: string | null;
+          user_agent?: string | null;
         };
       };
     };
   };
-}
-
-export type PostWithRelations = Database['public']['Tables']['posts']['Row'] & {
-  category?: Database['public']['Tables']['categories']['Row'] | null;
-  tags?: Database['public']['Tables']['tags']['Row'][];
 };

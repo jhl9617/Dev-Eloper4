@@ -1,0 +1,357 @@
+/* ============================================================================
+   Dev-Eloper4 Blog Database Schema - Complete Setup
+   ============================================================================
+   
+   This file contains the complete database schema for the blog application,
+   including all tables, functions, RLS policies, and security enhancements.
+   
+   Run this file in Supabase SQL Editor to set up the complete database.
+   
+   ============================================================================ */
+
+/* ============================================================================
+   1. Extensions and Initial Setup
+   ============================================================================ */
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";     -- UUID 생성
+CREATE EXTENSION IF NOT EXISTS pgcrypto;        -- 암호화/해시 함수
+
+/* ============================================================================
+   2. ENUMS
+   ============================================================================ */
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'post_status') THEN
+    CREATE TYPE post_status AS ENUM ('draft', 'scheduled', 'published', 'archived');
+  END IF;
+END $$;
+
+/* ============================================================================
+   3. Utility Functions
+   ============================================================================ */
+
+-- Updated_at 자동 갱신 함수
+CREATE OR REPLACE FUNCTION set_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Posts 검색 벡터 자동 생성 함수
+CREATE OR REPLACE FUNCTION set_posts_search_vector()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.search_vector :=
+    setweight(to_tsvector('simple', coalesce(NEW.title,   '')), 'A') ||
+    setweight(to_tsvector('simple', coalesce(NEW.content, '')), 'B');
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+/* ============================================================================
+   4. Core Tables
+   ============================================================================ */
+
+-- Admins 테이블 (관리자 권한 관리)
+CREATE TABLE IF NOT EXISTS admins (
+    user_id UUID PRIMARY KEY,
+    added_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Categories 테이블
+CREATE TABLE IF NOT EXISTS categories (
+    id          BIGSERIAL PRIMARY KEY,
+    created_at  TIMESTAMPTZ DEFAULT now(),
+    updated_at  TIMESTAMPTZ DEFAULT now(),
+    deleted_at  TIMESTAMPTZ,
+    name        TEXT NOT NULL,
+    slug        TEXT NOT NULL,
+    CONSTRAINT categories_slug_chk CHECK (slug ~ '^[a-z0-9-]+$'),
+    CONSTRAINT categories_slug_uniq UNIQUE (slug)
+);
+
+-- Tags 테이블
+CREATE TABLE IF NOT EXISTS tags (
+    id          BIGSERIAL PRIMARY KEY,
+    created_at  TIMESTAMPTZ DEFAULT now(),
+    updated_at  TIMESTAMPTZ DEFAULT now(),
+    deleted_at  TIMESTAMPTZ,
+    name        TEXT NOT NULL,
+    slug        TEXT NOT NULL,
+    CONSTRAINT tags_slug_chk CHECK (slug ~ '^[a-z0-9-]+$'),
+    CONSTRAINT tags_slug_uniq UNIQUE (slug)
+);
+
+-- Posts 테이블
+CREATE TABLE IF NOT EXISTS posts (
+    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    created_at      TIMESTAMPTZ DEFAULT now(),
+    updated_at      TIMESTAMPTZ DEFAULT now(),
+    deleted_at      TIMESTAMPTZ,
+    status          post_status DEFAULT 'draft',
+    published_at    TIMESTAMPTZ,
+    title           TEXT NOT NULL,
+    content         TEXT NOT NULL,
+    slug            TEXT NOT NULL,
+    cover_image_path TEXT,
+    category_id     BIGINT REFERENCES categories(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    search_vector   TSVECTOR
+);
+
+-- Post-Tag 관계 테이블 (다대다)
+CREATE TABLE IF NOT EXISTS post_tags (
+    post_id UUID REFERENCES posts(id) ON DELETE CASCADE,
+    tag_id  BIGINT REFERENCES tags(id) ON DELETE CASCADE,
+    PRIMARY KEY (post_id, tag_id)
+);
+
+-- Security Logs 테이블
+CREATE TABLE IF NOT EXISTS security_logs (
+    id          BIGSERIAL PRIMARY KEY,
+    created_at  TIMESTAMPTZ DEFAULT now(),
+    user_id     UUID,
+    action      TEXT NOT NULL,
+    details     JSONB,
+    ip_address  INET,
+    user_agent  TEXT
+);
+
+-- Login Attempts 테이블
+CREATE TABLE IF NOT EXISTS login_attempts (
+    id          BIGSERIAL PRIMARY KEY,
+    created_at  TIMESTAMPTZ DEFAULT now(),
+    email       TEXT NOT NULL,
+    success     BOOLEAN DEFAULT false,
+    ip_address  INET,
+    user_agent  TEXT
+);
+
+/* ============================================================================
+   5. Indexes
+   ============================================================================ */
+
+-- Posts 인덱스
+CREATE UNIQUE INDEX IF NOT EXISTS uniq_posts_slug_live
+  ON posts(slug) WHERE deleted_at IS NULL;
+
+CREATE INDEX IF NOT EXISTS idx_posts_status_pubat
+  ON posts(status, coalesce(published_at, created_at) DESC);
+
+CREATE INDEX IF NOT EXISTS idx_posts_created_at
+  ON posts(created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_posts_search_vector
+  ON posts USING gin(search_vector);
+
+-- Security logs 인덱스
+CREATE INDEX IF NOT EXISTS idx_security_logs_user_id
+  ON security_logs(user_id);
+
+CREATE INDEX IF NOT EXISTS idx_security_logs_created_at
+  ON security_logs(created_at DESC);
+
+-- Login attempts 인덱스
+CREATE INDEX IF NOT EXISTS idx_login_attempts_email
+  ON login_attempts(email);
+
+CREATE INDEX IF NOT EXISTS idx_login_attempts_created_at
+  ON login_attempts(created_at DESC);
+
+/* ============================================================================
+   6. Triggers
+   ============================================================================ */
+
+-- Updated_at 자동 갱신 트리거
+CREATE TRIGGER trg_categories_updated_at
+  BEFORE UPDATE ON categories
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+CREATE TRIGGER trg_tags_updated_at
+  BEFORE UPDATE ON tags
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+CREATE TRIGGER trg_posts_updated_at
+  BEFORE UPDATE ON posts
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+-- Posts 검색 벡터 자동 생성 트리거
+CREATE TRIGGER trg_posts_tsv
+  BEFORE INSERT OR UPDATE ON posts
+  FOR EACH ROW EXECUTE FUNCTION set_posts_search_vector();
+
+/* ============================================================================
+   7. Security Functions
+   ============================================================================ */
+
+-- 관리자 권한 확인 함수 (무한 재귀 방지)
+CREATE OR REPLACE FUNCTION is_admin()
+RETURNS boolean 
+LANGUAGE sql 
+SECURITY DEFINER -- 함수 소유자 권한으로 실행
+STABLE
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM admins 
+    WHERE user_id = auth.uid()
+  );
+$$;
+
+-- 보안 로그 기록 함수
+CREATE OR REPLACE FUNCTION log_security_event(
+  p_action TEXT,
+  p_details JSONB DEFAULT NULL,
+  p_ip_address INET DEFAULT NULL,
+  p_user_agent TEXT DEFAULT NULL
+)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  INSERT INTO security_logs (user_id, action, details, ip_address, user_agent)
+  VALUES (auth.uid(), p_action, p_details, p_ip_address, p_user_agent);
+END;
+$$;
+
+-- 로그인 시도 기록 함수
+CREATE OR REPLACE FUNCTION log_login_attempt(
+  p_email TEXT,
+  p_success BOOLEAN,
+  p_ip_address INET DEFAULT NULL,
+  p_user_agent TEXT DEFAULT NULL
+)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  INSERT INTO login_attempts (email, success, ip_address, user_agent)
+  VALUES (p_email, p_success, p_ip_address, p_user_agent);
+END;
+$$;
+
+/* ============================================================================
+   8. Row Level Security (RLS) Setup
+   ============================================================================ */
+
+-- Admins 테이블: RLS 비활성화 (무한 재귀 방지)
+ALTER TABLE admins DISABLE ROW LEVEL SECURITY;
+
+-- 다른 모든 테이블에 RLS 활성화
+ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tags ENABLE ROW LEVEL SECURITY;
+ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE post_tags ENABLE ROW LEVEL SECURITY;
+ALTER TABLE security_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE login_attempts ENABLE ROW LEVEL SECURITY;
+
+/* ============================================================================
+   9. RLS Policies
+   ============================================================================ */
+
+-- Categories 정책
+CREATE POLICY categories_public_read
+  ON categories FOR SELECT
+  USING (deleted_at IS NULL);
+
+CREATE POLICY categories_admin_full
+  ON categories FOR ALL
+  USING (is_admin());
+
+-- Tags 정책
+CREATE POLICY tags_public_read
+  ON tags FOR SELECT
+  USING (deleted_at IS NULL);
+
+CREATE POLICY tags_admin_full
+  ON tags FOR ALL
+  USING (is_admin());
+
+-- Posts 정책
+CREATE POLICY posts_public_read
+  ON posts FOR SELECT
+  USING (deleted_at IS NULL AND status = 'published');
+
+CREATE POLICY posts_admin_full
+  ON posts FOR ALL
+  USING (is_admin());
+
+-- Post_tags 정책
+CREATE POLICY post_tags_public_read
+  ON post_tags FOR SELECT
+  USING (EXISTS (
+    SELECT 1 FROM posts 
+    WHERE posts.id = post_tags.post_id 
+    AND posts.deleted_at IS NULL 
+    AND posts.status = 'published'
+  ));
+
+CREATE POLICY post_tags_admin_full
+  ON post_tags FOR ALL
+  USING (is_admin());
+
+-- Security logs 정책
+CREATE POLICY security_logs_admin_only
+  ON security_logs FOR ALL
+  USING (is_admin());
+
+-- Login attempts 정책
+CREATE POLICY login_attempts_admin_only
+  ON login_attempts FOR ALL
+  USING (is_admin());
+
+/* ============================================================================
+   10. Function Permissions
+   ============================================================================ */
+
+-- 함수 실행 권한 부여
+GRANT EXECUTE ON FUNCTION is_admin() TO authenticated;
+GRANT EXECUTE ON FUNCTION is_admin() TO anon;
+GRANT EXECUTE ON FUNCTION log_security_event(TEXT, JSONB, INET, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION log_login_attempt(TEXT, BOOLEAN, INET, TEXT) TO authenticated;
+
+/* ============================================================================
+   11. Initial Data Setup
+   ============================================================================ */
+
+-- 기본 카테고리 생성
+INSERT INTO categories (name, slug) VALUES 
+  ('Technology', 'technology'),
+  ('Web Development', 'web-development'),
+  ('Programming', 'programming'),
+  ('Tutorial', 'tutorial')
+ON CONFLICT (slug) DO NOTHING;
+
+-- 기본 태그 생성
+INSERT INTO tags (name, slug) VALUES 
+  ('JavaScript', 'javascript'),
+  ('React', 'react'),
+  ('TypeScript', 'typescript'),
+  ('Next.js', 'nextjs'),
+  ('Node.js', 'nodejs'),
+  ('CSS', 'css'),
+  ('HTML', 'html'),
+  ('Database', 'database'),
+  ('API', 'api'),
+  ('Frontend', 'frontend'),
+  ('Backend', 'backend'),
+  ('Full Stack', 'full-stack')
+ON CONFLICT (slug) DO NOTHING;
+
+/* ============================================================================
+   12. Completion Notice
+   ============================================================================ */
+
+DO $$
+BEGIN
+  RAISE NOTICE '✅ Database setup completed successfully!';
+  RAISE NOTICE '📋 Created tables: admins, categories, tags, posts, post_tags, security_logs, login_attempts';
+  RAISE NOTICE '🔧 Functions: is_admin(), log_security_event(), log_login_attempt()';
+  RAISE NOTICE '🛡️ RLS policies applied to all tables';
+  RAISE NOTICE '📊 Initial data inserted for categories and tags';
+  RAISE NOTICE '';
+  RAISE NOTICE '🔑 Next steps:';
+  RAISE NOTICE '   1. Add your admin user: INSERT INTO admins (user_id) VALUES (''your-uuid-here'');';
+  RAISE NOTICE '   2. Test admin function: SELECT is_admin();';
+  RAISE NOTICE '   3. Configure storage policies if needed';
+END $$;

@@ -24,7 +24,8 @@
       "Bash(npm run lint)",
       "Bash(pkill:*)",
       "Bash(mkdir:*)",
-      "Bash(touch:*)"
+      "Bash(touch:*)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }

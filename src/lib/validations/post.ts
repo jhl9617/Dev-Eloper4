@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { PostStatus } from '../supabase';
+import type { PostStatus } from '@/types/database';
 
 export const postSchema = z.object({
   title: z
