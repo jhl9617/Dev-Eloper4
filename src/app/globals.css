@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Syntax highlighting for code blocks - imported through components */
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -65,5 +67,96 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
+}
+
+/* Dark mode syntax highlighting - handled via CSS variables */
+
+/* Custom styles for improved responsiveness */
+@layer utilities {
+  .prose {
+    @apply max-w-none;
+  }
+  
+  .prose pre {
+    @apply overflow-x-auto rounded-lg border bg-muted px-4 py-3;
+  }
+  
+  .prose code {
+    @apply relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm;
+  }
+  
+  .prose pre code {
+    @apply bg-transparent p-0;
+  }
+  
+  /* Line clamp utilities */
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+  
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+}
+
+/* Loading states */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.dark .shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+}
+
+/* Enhanced prose styling for dark mode */
+.prose {
+  color: hsl(var(--foreground)) !important;
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  color: hsl(var(--foreground)) !important;
+}
+
+.prose strong {
+  color: hsl(var(--foreground)) !important;
+}
+
+.prose a {
+  color: hsl(var(--primary)) !important;
+}
+
+.prose blockquote {
+  border-left-color: hsl(var(--border)) !important;
+  color: hsl(var(--muted-foreground)) !important;
 }

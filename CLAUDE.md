@@ -147,3 +147,25 @@ Use Gemini as a secondary AI assistant for:
 - When reviewing large-scale architectural changes
 - For second opinions on critical code decisions
 - When analyzing lengthy documentation or requirements
+
+## Project Progress Logging
+
+**CRITICAL**: All work progress must be logged in `docs/progress-log.md`
+
+### Required Logging Points
+- Work plan creation and updates
+- Important technical decisions
+- Context changes and requirement updates
+- Problem resolution and solutions
+- Task completion and next steps
+
+### Logging Format
+```markdown
+### [YYYY-MM-DD HH:MM] Task Title
+**작업**: Task summary
+**중요 컨텍스트**: Critical context info
+**결과/결정사항**: Results and decisions
+**다음 단계**: Next steps
+```
+
+**Always check `docs/progress-log.md` before starting work to understand current project state and context.**

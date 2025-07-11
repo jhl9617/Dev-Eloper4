@@ -9,7 +9,22 @@
       "mcp__vooster-ai__init_rules",
       "Bash(rm:*)",
       "Bash(npm run dev:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(gemini:*)",
+      "Bash(npm install:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(npx:*)",
+      "Bash(npm run build:*)",
+      "Bash(timeout 20 npm run dev)",
+      "Bash(timeout 30 npm run build)",
+      "Bash(node:*)",
+      "Bash(npm cache clean:*)",
+      "Bash(curl:*)",
+      "Bash(chmod:*)",
+      "Bash(npm run lint)",
+      "Bash(pkill:*)",
+      "Bash(mkdir:*)",
+      "Bash(touch:*)"
     ],
     "deny": []
   }
