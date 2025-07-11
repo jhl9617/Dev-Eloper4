@@ -180,7 +180,7 @@ export default function EditPostPage() {
         .eq('slug', data.slug)
         .neq('id', post.id)
         .is('deleted_at', null)
-        .single();
+        .maybeSingle();
 
       if (existingPost) {
         form.setError('slug', { message: 'This slug already exists' });
@@ -189,14 +189,14 @@ export default function EditPostPage() {
       }
 
       // Prepare post data
+      const { tag_ids, ...postDataWithoutTags } = data;
       const postData = {
-        ...data,
+        ...postDataWithoutTags,
         status,
         published_at: status === 'published' && !data.published_at 
           ? new Date().toISOString() 
           : data.published_at,
         updated_at: new Date().toISOString(),
-        tag_ids: undefined, // Remove from main update
       };
 
       // Update post

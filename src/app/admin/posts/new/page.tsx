@@ -93,7 +93,7 @@ export default function NewPostPage() {
         .select('id')
         .eq('slug', data.slug)
         .is('deleted_at', null)
-        .single();
+        .maybeSingle();
 
       if (existingPost) {
         form.setError('slug', { message: 'This slug already exists' });
@@ -102,11 +102,11 @@ export default function NewPostPage() {
       }
 
       // Prepare post data
+      const { tag_ids, ...postDataWithoutTags } = data;
       const postData = {
-        ...data,
+        ...postDataWithoutTags,
         status,
         published_at: status === 'published' ? new Date().toISOString() : data.published_at,
-        tag_ids: undefined, // Remove from main insert
       };
 
       // Insert post
