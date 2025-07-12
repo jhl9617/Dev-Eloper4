@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -9,9 +8,14 @@ import { Menu, Search, User, LogOut, Settings } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { SearchInput } from '@/components/search/search-input';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
+import { LanguageToggle } from '@/components/shared/language-toggle';
+import { Link } from '@/i18n/routing';
+import { useTranslations } from 'next-intl';
 
 function AuthButton() {
   const { user, isAdmin, signOut, loading } = useAuth();
+  const t = useTranslations('navigation');
+  const tAuth = useTranslations('auth');
 
   if (loading) {
     return (
@@ -26,7 +30,7 @@ function AuthButton() {
       <Button variant="ghost" size="sm" asChild>
         <Link href="/auth/login">
           <User className="h-4 w-4" />
-          <span className="sr-only">Login</span>
+          <span className="sr-only">{t('login')}</span>
         </Link>
       </Button>
     );
@@ -50,7 +54,7 @@ function AuthButton() {
             <DropdownMenuItem asChild>
               <Link href="/admin">
                 <Settings className="mr-2 h-4 w-4" />
-                Admin Dashboard
+                {t('admin')}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -58,7 +62,7 @@ function AuthButton() {
         )}
         <DropdownMenuItem onClick={() => signOut()}>
           <LogOut className="mr-2 h-4 w-4" />
-          Sign Out
+          {tAuth('signOut')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -67,11 +71,13 @@ function AuthButton() {
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const t = useTranslations('navigation');
+  const tSearch = useTranslations('search');
 
   const navItems = [
-    { href: '/', label: 'Home' },
-    { href: '/categories', label: 'Categories' },
-    { href: '/about', label: 'About' },
+    { href: '/', label: t('home') },
+    { href: '/categories', label: t('categories') },
+    { href: '/about', label: t('about') },
   ];
 
   return (
@@ -100,9 +106,10 @@ export function Header() {
         {/* Desktop Actions */}
         <div className="ml-auto flex items-center space-x-4">
           <div className="hidden md:block w-64">
-            <SearchInput placeholder="Search posts..." />
+            <SearchInput placeholder={tSearch('searchPlaceholder')} />
           </div>
           <ThemeToggle />
+          <LanguageToggle />
           <AuthButton />
         </div>
 
@@ -120,7 +127,7 @@ export function Header() {
           <SheetContent side="right" className="pr-0">
             <nav className="flex flex-col space-y-3">
               <div className="mb-4">
-                <SearchInput placeholder="Search posts..." />
+                <SearchInput placeholder={tSearch('searchPlaceholder')} />
               </div>
               {navItems.map((item) => (
                 <Link
@@ -137,12 +144,16 @@ export function Header() {
                 <span className="text-lg">Theme</span>
                 <ThemeToggle />
               </div>
+              <div className="flex items-center justify-between px-2 py-1">
+                <span className="text-lg">Language</span>
+                <LanguageToggle />
+              </div>
               <Link
                 href="/admin"
                 onClick={() => setIsOpen(false)}
                 className="block px-2 py-1 text-lg transition-colors hover:text-foreground/80"
               >
-                Admin
+                {t('admin')}
               </Link>
             </nav>
           </SheetContent>

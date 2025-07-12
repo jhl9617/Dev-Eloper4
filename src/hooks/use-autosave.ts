@@ -15,8 +15,8 @@ export function useAutoSave<T>(
 ) {
   const { onSave, delay = 5000, enabled = true } = options;
   const { toast } = useToast();
-  const timeoutRef = useRef<NodeJS.Timeout>();
-  const lastSavedRef = useRef<string>();
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastSavedRef = useRef<string>('');
   const isSavingRef = useRef<boolean>(false);
 
   const save = useCallback(async () => {

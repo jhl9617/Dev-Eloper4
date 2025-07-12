@@ -2,7 +2,7 @@ import { PostWithRelations } from '@/lib/blog';
 
 interface JsonLdProps {
   type: 'website' | 'article' | 'blog';
-  post?: PostWithRelations;
+  post?: any;
 }
 
 export function JsonLd({ type, post }: JsonLdProps) {

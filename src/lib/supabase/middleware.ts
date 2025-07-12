@@ -1,8 +1,8 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
+export async function updateSession(request: NextRequest, response?: NextResponse) {
+  let supabaseResponse = response || NextResponse.next({
     request,
   })
 
@@ -35,12 +35,19 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  // Extract locale from pathname
+  const pathSegments = request.nextUrl.pathname.split('/')
+  const localeFromPath = pathSegments[1]
+  const isLocaleRoute = ['en', 'ko'].includes(localeFromPath)
+  const actualPath = isLocaleRoute ? '/' + pathSegments.slice(2).join('/') : request.nextUrl.pathname
+  
   // Protect admin routes
-  if (request.nextUrl.pathname.startsWith('/admin')) {
+  if (actualPath.startsWith('/admin')) {
     if (!user) {
       // No user, redirect to login
       const url = request.nextUrl.clone()
-      url.pathname = '/auth/login'
+      const locale = isLocaleRoute ? localeFromPath : 'en'
+      url.pathname = `/${locale}/auth/login`
       url.searchParams.set('redirectTo', request.nextUrl.pathname)
       return NextResponse.redirect(url)
     }
@@ -51,7 +58,8 @@ export async function updateSession(request: NextRequest) {
     if (!isAdmin) {
       // User exists but is not admin
       const url = request.nextUrl.clone()
-      url.pathname = '/unauthorized'
+      const locale = isLocaleRoute ? localeFromPath : 'en'
+      url.pathname = `/${locale}/unauthorized`
       return NextResponse.redirect(url)
     }
   }

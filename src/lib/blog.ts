@@ -1,5 +1,5 @@
 import { createClient } from './supabase/client';
-import type { Database } from './supabase';
+import type { Database } from '@/types/database';
 
 type Post = Database['public']['Tables']['posts']['Row'];
 type Category = Database['public']['Tables']['categories']['Row'];

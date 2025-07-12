@@ -90,7 +90,7 @@ export function SearchResults({
 
       {/* Posts Grid */}
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {posts.map((post) => (
+        {posts.map((post: any) => (
           <PostCard key={post.id} post={post} />
         ))}
       </div>

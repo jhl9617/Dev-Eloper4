@@ -160,7 +160,7 @@ export function SearchInput({
                   <h4 className="font-medium text-sm">Search Results</h4>
                 </div>
                 <div className="max-h-64 overflow-y-auto">
-                  {results.map((post) => (
+                  {results.map((post: any) => (
                     <button
                       key={post.id}
                       className="w-full p-3 text-left hover:bg-muted/50 border-b last:border-b-0 transition-colors"

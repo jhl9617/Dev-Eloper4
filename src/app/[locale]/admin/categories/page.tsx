@@ -59,7 +59,7 @@ export default function CategoriesPage() {
   const [showTagDialog, setShowTagDialog] = useState(false);
   
   const { toast } = useToast();
-  const { isAdmin } = useAuth();
+  const { user, isAdmin } = useAuth();
   const supabase = createClient();
 
   const categoryForm = useForm<CategoryFormData>({

@@ -10,7 +10,7 @@ import { Plus, Edit, Trash2, Eye, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { formatDate, getStatusColor, getStatusText } from '@/lib/utils/slug';
 import { PostDeleteButton } from '@/components/admin/post-delete-button';
-import type { Database } from '@/lib/supabase';
+import type { Database } from '@/types/database';
 
 type Post = Database['public']['Tables']['posts']['Row'];
 type Category = Database['public']['Tables']['categories']['Row'];

@@ -5,10 +5,11 @@ import { PostCard } from '@/components/blog/post-card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, ArrowRight, Tag } from 'lucide-react';
-import Link from 'next/link';
+import { Link } from '@/i18n/routing';
 
 interface TagPageProps {
   params: Promise<{
+    locale: string;
     slug: string;
   }>;
   searchParams: Promise<{
@@ -17,7 +18,7 @@ interface TagPageProps {
 }
 
 export async function generateMetadata({ params }: TagPageProps): Promise<Metadata> {
-  const { slug } = await params;
+  const { locale, slug } = await params;
   const tags = await getTags();
   const tag = tags.find(t => t.slug === slug);
 
@@ -40,7 +41,7 @@ export async function generateMetadata({ params }: TagPageProps): Promise<Metada
 const POSTS_PER_PAGE = 12;
 
 export default async function TagPage({ params, searchParams }: TagPageProps) {
-  const { slug } = await params;
+  const { locale, slug } = await params;
   const searchParamsValue = await searchParams;
   const currentPage = Number(searchParamsValue.page) || 1;
   const offset = (currentPage - 1) * POSTS_PER_PAGE;
@@ -108,7 +109,7 @@ export default async function TagPage({ params, searchParams }: TagPageProps) {
       ) : (
         <>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
-            {posts.map((post) => (
+            {posts.map((post: any) => (
               <PostCard key={post.id} post={post} />
             ))}
           </div>

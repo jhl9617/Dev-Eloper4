@@ -12,7 +12,7 @@ import { CalendarDays, Clock, User, ImageIcon } from 'lucide-react';
 import type { PostWithRelations } from '@/lib/blog';
 
 interface PostCardProps {
-  post: PostWithRelations;
+  post: any;
 }
 
 export const PostCard = memo(function PostCard({ post }: PostCardProps) {
