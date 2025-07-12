@@ -25,7 +25,11 @@
       "Bash(pkill:*)",
       "Bash(mkdir:*)",
       "Bash(touch:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(npm audit:*)",
+      "Bash(npm update:*)",
+      "Bash(npm test:*)",
+      "Bash(npm run:*)"
     ],
     "deny": []
   }

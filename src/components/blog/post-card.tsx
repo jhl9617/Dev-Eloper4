@@ -6,7 +6,9 @@ import { memo, useMemo } from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { LazyImage } from '@/components/ui/lazy-image';
-import { CalendarDays, Clock, User } from 'lucide-react';
+import { HtmlPreview } from '@/components/blog/html-content';
+import { getPostThumbnail } from '@/lib/utils/html-utils';
+import { CalendarDays, Clock, User, ImageIcon } from 'lucide-react';
 import type { PostWithRelations } from '@/lib/blog';
 
 interface PostCardProps {
@@ -14,36 +16,42 @@ interface PostCardProps {
 }
 
 export const PostCard = memo(function PostCard({ post }: PostCardProps) {
-  const { publishedDate, preview, readingTime } = useMemo(() => {
+  const { publishedDate, readingTime, thumbnailUrl } = useMemo(() => {
     const publishedDate = post.published_at 
       ? new Date(post.published_at) 
       : new Date(post.created_at);
 
-    // Extract a preview from content (first 150 characters)
-    const preview = post.content
-      .replace(/[#*`]/g, '') // Remove markdown symbols
-      .slice(0, 150) + (post.content.length > 150 ? '...' : '');
-
     // Estimate reading time (average 200 words per minute)
-    const wordCount = post.content.split(/\s+/).length;
+    const textContent = post.content.replace(/<[^>]*>/g, ''); // Remove HTML tags
+    const wordCount = textContent.split(/\s+/).length;
     const readingTime = Math.ceil(wordCount / 200);
 
-    return { publishedDate, preview, readingTime };
-  }, [post.content, post.published_at, post.created_at]);
+    // Get thumbnail (cover image or first image from content)
+    const thumbnailUrl = getPostThumbnail(post.cover_image_path, post.content);
+
+    return { publishedDate, readingTime, thumbnailUrl };
+  }, [post.content, post.published_at, post.created_at, post.cover_image_path]);
 
   return (
     <Card className="h-full flex flex-col transition-shadow hover:shadow-lg">
-      {post.cover_image_path && (
-        <div className="aspect-[16/9] overflow-hidden rounded-t-lg">
-          <LazyImage
-            src={post.cover_image_path}
-            alt={post.title}
-            className="h-full w-full object-cover transition-transform hover:scale-105"
-            width={400}
-            height={225}
-          />
+      {/* Thumbnail Section */}
+      <Link href={`/posts/${post.slug}`} className="block">
+        <div className="aspect-[16/9] overflow-hidden rounded-t-lg relative">
+          {thumbnailUrl ? (
+            <LazyImage
+              src={thumbnailUrl}
+              alt={post.title}
+              className="h-full w-full object-cover transition-transform hover:scale-105"
+              width={400}
+              height={225}
+            />
+          ) : (
+            <div className="h-full w-full bg-muted flex items-center justify-center">
+              <ImageIcon className="h-12 w-12 text-muted-foreground" />
+            </div>
+          )}
         </div>
-      )}
+      </Link>
       
       <CardHeader className="flex-1">
         <div className="space-y-2">
@@ -67,9 +75,13 @@ export const PostCard = memo(function PostCard({ post }: PostCardProps) {
       </CardHeader>
 
       <CardContent className="flex-1">
-        <p className="text-muted-foreground line-clamp-3">
-          {preview}
-        </p>
+        <Link href={`/posts/${post.slug}`} className="block group">
+          <HtmlPreview 
+            content={post.content}
+            maxLength={150}
+            className="line-clamp-3 group-hover:text-foreground/80 transition-colors"
+          />
+        </Link>
       </CardContent>
 
       <CardFooter className="flex flex-col space-y-3">

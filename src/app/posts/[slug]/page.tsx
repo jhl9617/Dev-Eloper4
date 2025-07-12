@@ -1,9 +1,8 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { format } from 'date-fns';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import rehypeHighlight from 'rehype-highlight';
+import { HtmlContent } from '@/components/blog/html-content';
+import { getPostThumbnail } from '@/lib/utils/html-utils';
 import { createClient } from '@/lib/supabase/client';
 import { getPostBySlug } from '@/lib/blog';
 import { Badge } from '@/components/ui/badge';
@@ -31,8 +30,11 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
   }
 
   const description = post.content
-    .replace(/[#*`]/g, '')
+    .replace(/<[^>]*>/g, '') // Remove HTML tags
     .slice(0, 160) + (post.content.length > 160 ? '...' : '');
+
+  // Get the best thumbnail image (cover image or first image from content)
+  const thumbnailUrl = getPostThumbnail(post.cover_image_path, post.content);
 
   return {
     title: post.title,
@@ -46,9 +48,9 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
       publishedTime: post.published_at || post.created_at,
       authors: ['DevBlog'],
       tags: post.tags?.map(tag => tag.name),
-      images: post.cover_image_path ? [
+      images: thumbnailUrl ? [
         {
-          url: post.cover_image_path,
+          url: thumbnailUrl,
           width: 1200,
           height: 630,
           alt: post.title,
@@ -59,7 +61,7 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
       card: 'summary_large_image',
       title: post.title,
       description,
-      images: post.cover_image_path ? [post.cover_image_path] : [],
+      images: thumbnailUrl ? [thumbnailUrl] : [],
     },
   };
 }
@@ -77,8 +79,12 @@ export default async function PostPage({ params }: PostPageProps) {
     : new Date(post.created_at);
 
   // Estimate reading time (average 200 words per minute)
-  const wordCount = post.content.split(/\s+/).length;
+  const textContent = post.content.replace(/<[^>]*>/g, '');
+  const wordCount = textContent.split(/\s+/).length;
   const readingTime = Math.ceil(wordCount / 200);
+
+  // Get thumbnail for display
+  const thumbnailUrl = getPostThumbnail(post.cover_image_path, post.content);
 
   return (
     <>
@@ -96,10 +102,10 @@ export default async function PostPage({ params }: PostPageProps) {
 
       {/* Header */}
       <header className="mb-8">
-        {post.cover_image_path && (
+        {thumbnailUrl && (
           <div className="aspect-[16/9] overflow-hidden rounded-lg mb-6 relative">
             <Image
-              src={post.cover_image_path}
+              src={thumbnailUrl}
               alt={post.title}
               fill
               className="object-cover"
@@ -153,37 +159,11 @@ export default async function PostPage({ params }: PostPageProps) {
       <Separator className="mb-8" />
 
       {/* Content */}
-      <article className="prose prose-lg max-w-none dark:prose-invert">
-        <ReactMarkdown
-          remarkPlugins={[remarkGfm]}
-          rehypePlugins={[rehypeHighlight]}
-          components={{
-            code({ className, children, ...props }) {
-              const match = /language-(\w+)/.exec(className || '');
-              return (
-                <code className={match ? className : "bg-muted px-1 py-0.5 rounded text-sm"} {...props}>
-                  {children}
-                </code>
-              );
-            },
-            a({ href, children, ...props }) {
-              // External links open in new tab
-              const isExternal = href?.startsWith('http');
-              return (
-                <a
-                  href={href}
-                  target={isExternal ? '_blank' : undefined}
-                  rel={isExternal ? 'noopener noreferrer' : undefined}
-                  {...props}
-                >
-                  {children}
-                </a>
-              );
-            },
-          }}
-        >
-          {post.content}
-        </ReactMarkdown>
+      <article>
+        <HtmlContent 
+          content={post.content}
+          className="prose prose-lg max-w-none dark:prose-invert"
+        />
       </article>
 
       <Separator className="my-8" />

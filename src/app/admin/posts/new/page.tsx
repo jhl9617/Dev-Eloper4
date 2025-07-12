@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Checkbox } from '@/components/ui/checkbox';
-import { MarkdownEditor } from '@/components/admin/markdown-editor';
+import { RichTextEditorEnhanced } from '@/components/admin/rich-text-editor-enhanced';
 import { ImageUpload } from '@/components/admin/image-upload';
 import { Save, Send, Clock, Archive, Loader2 } from 'lucide-react';
 
@@ -245,10 +245,12 @@ export default function NewPostPage() {
                     <FormItem>
                       <FormLabel>Content</FormLabel>
                       <FormControl>
-                        <MarkdownEditor
+                        <RichTextEditorEnhanced
                           value={field.value}
                           onChange={field.onChange}
-                          height="h-96"
+                          placeholder="Start writing your post content..."
+                          showWordCount={true}
+                          maxLength={50000}
                         />
                       </FormControl>
                       <FormMessage />

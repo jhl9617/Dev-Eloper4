@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* TipTap Editor Styles */
+@import '../styles/tiptap.css';
+
 /* Syntax highlighting for code blocks - imported through components */
 
 @layer base {

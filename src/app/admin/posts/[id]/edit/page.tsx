@@ -19,7 +19,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { MarkdownEditor } from '@/components/admin/markdown-editor';
+import { RichTextEditorEnhanced } from '@/components/admin/rich-text-editor-enhanced';
 import { ImageUpload } from '@/components/admin/image-upload';
 import { Save, Send, Clock, Archive, ArrowLeft, Trash2, Eye } from 'lucide-react';
 import Link from 'next/link';
@@ -413,10 +413,12 @@ export default function EditPostPage() {
                     <FormItem>
                       <FormLabel>Content</FormLabel>
                       <FormControl>
-                        <MarkdownEditor
+                        <RichTextEditorEnhanced
                           value={field.value}
                           onChange={field.onChange}
-                          height="h-96"
+                          placeholder="Edit your post content..."
+                          showWordCount={true}
+                          maxLength={50000}
                         />
                       </FormControl>
                       <FormMessage />
