@@ -1,12 +1,62 @@
 "use client";
 
 import { useTranslations } from 'next-intl';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Github, Twitter, Mail, MapPin, Calendar } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
+import type { CategoryWithStats } from '@/lib/blog';
+import { getTranslatedCategoryName } from '@/lib/translations';
 
 export default function AboutPage() {
   const t = useTranslations();
+  const tCategories = useTranslations('categories');
+  const [categories, setCategories] = useState<CategoryWithStats[]>([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const supabase = createClient();
+      
+      // Fetch categories with stats (same logic as in lib/blog.ts)
+      const { data: categoriesData } = await supabase
+        .from('categories')
+        .select(`
+          *,
+          posts!inner(id)
+        `)
+        .is('deleted_at', null)
+        .eq('posts.status', 'published')
+        .is('posts.deleted_at', null)
+        .limit(6);
+
+      if (categoriesData) {
+        const categoryStats = new Map<string, number>();
+        categoriesData.forEach(item => {
+          const count = categoryStats.get(item.id.toString()) || 0;
+          categoryStats.set(item.id.toString(), count + 1);
+        });
+
+        const uniqueCategories = new Map();
+        categoriesData.forEach(item => {
+          if (!uniqueCategories.has(item.id)) {
+            uniqueCategories.set(item.id, {
+              ...item,
+              post_count: categoryStats.get(item.id.toString()) || 0
+            });
+          }
+        });
+
+        const sortedCategories = Array.from(uniqueCategories.values())
+          .sort((a: any, b: any) => b.post_count - a.post_count)
+          .slice(0, 6);
+        
+        setCategories(sortedCategories);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -51,18 +101,20 @@ export default function AboutPage() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {[
-                    'Frontend Development',
-                    'Backend Development', 
-                    'DevOps & Cloud',
-                    'Database Design',
-                    'Mobile Development',
-                    'AI & Machine Learning'
-                  ].map((topic) => (
-                    <Badge key={topic} variant="secondary" className="p-2 text-center">
-                      {topic}
-                    </Badge>
-                  ))}
+                  {categories.length > 0 ? (
+                    categories.map((category) => (
+                      <Badge key={category.id} variant="secondary" className="p-2 text-center">
+                        {getTranslatedCategoryName(category.slug, tCategories, category.name)}
+                      </Badge>
+                    ))
+                  ) : (
+                    // Fallback while loading
+                    ['Frontend Development', 'Backend Development', 'DevOps & Cloud', 'Database Design', 'Mobile Development', 'AI & Machine Learning'].map((topic) => (
+                      <Badge key={topic} variant="secondary" className="p-2 text-center">
+                        {topic}
+                      </Badge>
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>

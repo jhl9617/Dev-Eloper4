@@ -58,7 +58,9 @@
     "filterByTag": "Filter by Tag",
     "allCategories": "All Categories",
     "allTags": "All Tags",
-    "clearFilters": "Clear Filters"
+    "clearFilters": "Clear Filters",
+    "popularCategories": "Popular Categories",
+    "trendingTopics": "Trending Topics"
   },
   "admin": {
     "dashboard": "Dashboard",
@@ -87,7 +89,9 @@
     "postPublished": "Post published successfully",
     "confirmDelete": "Are you sure you want to delete this post?",
     "uploadImage": "Upload Image",
-    "imageUploaded": "Image uploaded successfully"
+    "imageUploaded": "Image uploaded successfully",
+    "totalArticles": "Total Articles",
+    "popularBadge": "Popular"
   },
   "auth": {
     "email": "Email",
@@ -127,5 +131,71 @@
     "weeksAgo": "{count} weeks ago",
     "monthsAgo": "{count} months ago",
     "yearsAgo": "{count} years ago"
+  },
+  "categories": {
+    "programming": "Programming",
+    "web-development": "Web Development",
+    "devops": "DevOps",
+    "tutorial": "Tutorial",
+    "frontend": "Frontend",
+    "backend": "Backend",
+    "database": "Database",
+    "mobile": "Mobile",
+    "ai-ml": "AI/ML",
+    "security": "Security",
+    "testing": "Testing",
+    "design": "Design"
+  },
+  "categoryDescriptions": {
+    "programming": "Programming tutorials and tips",
+    "web-development": "Frontend and backend development",
+    "devops": "DevOps and infrastructure",
+    "tutorial": "Step-by-step tutorials",
+    "frontend": "User interface and client-side development",
+    "backend": "Server-side development and APIs",
+    "database": "Database design and management",
+    "mobile": "Mobile app development",
+    "ai-ml": "Artificial Intelligence and Machine Learning",
+    "security": "Cybersecurity and application security",
+    "testing": "Software testing and quality assurance",
+    "design": "UI/UX design and principles"
+  },
+  "tags": {
+    "javascript": "JavaScript",
+    "typescript": "TypeScript",
+    "react": "React",
+    "nextjs": "Next.js",
+    "nodejs": "Node.js",
+    "python": "Python",
+    "vue": "Vue.js",
+    "angular": "Angular",
+    "docker": "Docker",
+    "kubernetes": "Kubernetes",
+    "aws": "AWS",
+    "tailwindcss": "Tailwind CSS",
+    "supabase": "Supabase",
+    "mongodb": "MongoDB",
+    "postgresql": "PostgreSQL",
+    "redis": "Redis",
+    "graphql": "GraphQL",
+    "rest-api": "REST API",
+    "jwt": "JWT",
+    "oauth": "OAuth",
+    "css": "CSS",
+    "backend": "Backend",
+    "frontend": "Frontend",
+    "html": "HTML",
+    "sass": "Sass",
+    "scss": "SCSS",
+    "webpack": "Webpack",
+    "vite": "Vite",
+    "eslint": "ESLint",
+    "prettier": "Prettier",
+    "git": "Git",
+    "github": "GitHub",
+    "gitlab": "GitLab",
+    "vercel": "Vercel",
+    "netlify": "Netlify",
+    "firebase": "Firebase"
   }
 }

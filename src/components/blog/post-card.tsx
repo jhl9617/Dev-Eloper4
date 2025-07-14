@@ -13,9 +13,10 @@ import type { PostWithRelations } from '@/lib/blog';
 
 interface PostCardProps {
   post: any;
+  priority?: boolean;
 }
 
-export const PostCard = memo(function PostCard({ post }: PostCardProps) {
+export const PostCard = memo(function PostCard({ post, priority = false }: PostCardProps) {
   const { publishedDate, readingTime, thumbnailUrl } = useMemo(() => {
     const publishedDate = post.published_at 
       ? new Date(post.published_at) 
@@ -44,6 +45,7 @@ export const PostCard = memo(function PostCard({ post }: PostCardProps) {
               className="h-full w-full object-cover transition-transform hover:scale-105"
               width={400}
               height={225}
+              priority={priority}
             />
           ) : (
             <div className="h-full w-full bg-muted flex items-center justify-center">

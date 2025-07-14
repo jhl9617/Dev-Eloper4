@@ -30,7 +30,13 @@
       "Bash(npm update:*)",
       "Bash(npm test:*)",
       "Bash(npm run:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(timeout 5 npm run dev)",
+      "Bash(timeout 10 npm run dev)",
+      "Bash(timeout 20 npm run build)",
+      "Bash(timeout 15 npm run dev)",
+      "Bash(timeout 15 npm run build)",
+      "Bash(git config:*)"
     ],
     "deny": []
   }

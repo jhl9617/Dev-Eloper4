@@ -31,8 +31,8 @@ export function useAuth() {
         // admin@devblog.com 이메일로 관리자 권한 부여 (임시)
         isAdmin = user.email === 'admin@devblog.com';
         
-        // Debug info for admin verification
-        console.log('Admin login:', user.email === 'admin@devblog.com' ? '✅' : '❌', user.email);
+        // Debug info for admin verification (disabled to reduce console noise)
+        // console.log('Admin login:', user.email === 'admin@devblog.com' ? '✅' : '❌', user.email);
       }
 
       setAuthState({ user, isAdmin, loading: false });
@@ -50,8 +50,8 @@ export function useAuth() {
           // admin@devblog.com 이메일로 관리자 권한 부여 (임시)
           isAdmin = user.email === 'admin@devblog.com';
           
-          // Debug info for admin verification
-          console.log('Auth change:', event, user.email === 'admin@devblog.com' ? '✅' : '❌', user.email);
+          // Debug info for admin verification (disabled to reduce console noise)
+          // console.log('Auth change:', event, user.email === 'admin@devblog.com' ? '✅' : '❌', user.email);
         }
 
         setAuthState({ user, isAdmin, loading: false });

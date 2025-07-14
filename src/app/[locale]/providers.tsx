@@ -2,6 +2,7 @@
 
 import { ThemeProvider } from '@/components/theme/theme-provider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { NoSSR } from '@/components/no-ssr';
 import { useState } from 'react';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
@@ -16,14 +17,17 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
-      >
-        {children}
-      </ThemeProvider>
+      <NoSSR>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+          storageKey="devblog-theme"
+        >
+          {children}
+        </ThemeProvider>
+      </NoSSR>
     </QueryClientProvider>
   );
 }

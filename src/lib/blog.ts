@@ -10,6 +10,16 @@ export interface PostWithRelations extends Post {
   tags?: Tag[];
 }
 
+export interface CategoryWithStats extends Category {
+  post_count: number;
+  trending?: boolean;
+}
+
+export interface TagWithStats extends Tag {
+  post_count: number;
+  trending?: boolean;
+}
+
 // Get published posts for public display
 export async function getPublishedPosts(limit = 10, offset = 0) {
   const supabase = createClient();
@@ -187,4 +197,115 @@ export async function searchPosts(query: string, limit = 10, offset = 0) {
   })) || [];
 
   return { posts, total: count || 0 };
+}
+
+// Get categories with post counts
+export async function getCategoriesWithStats(): Promise<CategoryWithStats[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('categories')
+    .select(`
+      *,
+      posts!inner(id)
+    `)
+    .is('deleted_at', null)
+    .eq('posts.status', 'published')
+    .is('posts.deleted_at', null);
+
+  if (error) {
+    console.error('Error fetching categories with stats:', error);
+    return [];
+  }
+
+  // Count posts for each category
+  const categoryStats = new Map<string, number>();
+  data?.forEach(item => {
+    const count = categoryStats.get(item.id.toString()) || 0;
+    categoryStats.set(item.id.toString(), count + 1);
+  });
+
+  // Get unique categories and add post counts
+  const uniqueCategories = new Map();
+  data?.forEach(item => {
+    if (!uniqueCategories.has(item.id)) {
+      uniqueCategories.set(item.id, {
+        ...item,
+        post_count: categoryStats.get(item.id.toString()) || 0
+      });
+    }
+  });
+
+  return Array.from(uniqueCategories.values()).sort((a, b) => b.post_count - a.post_count);
+}
+
+// Get popular categories (top categories by post count)
+export async function getPopularCategories(limit = 6): Promise<CategoryWithStats[]> {
+  const categoriesWithStats = await getCategoriesWithStats();
+  return categoriesWithStats.slice(0, limit);
+}
+
+// Get tags with post counts
+export async function getTagsWithStats(): Promise<TagWithStats[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('tags')
+    .select(`
+      *,
+      post_tags!inner(
+        posts!inner(id)
+      )
+    `)
+    .is('deleted_at', null)
+    .eq('post_tags.posts.status', 'published')
+    .is('post_tags.posts.deleted_at', null);
+
+  if (error) {
+    console.error('Error fetching tags with stats:', error);
+    return [];
+  }
+
+  // Count posts for each tag
+  const tagStats = new Map<string, number>();
+  data?.forEach(item => {
+    const count = tagStats.get(item.id.toString()) || 0;
+    tagStats.set(item.id.toString(), count + 1);
+  });
+
+  // Get unique tags and add post counts
+  const uniqueTags = new Map();
+  data?.forEach(item => {
+    if (!uniqueTags.has(item.id)) {
+      uniqueTags.set(item.id, {
+        ...item,
+        post_count: tagStats.get(item.id.toString()) || 0
+      });
+    }
+  });
+
+  return Array.from(uniqueTags.values()).sort((a, b) => b.post_count - a.post_count);
+}
+
+// Get trending tags (top tags by post count)
+export async function getTrendingTags(limit = 10): Promise<TagWithStats[]> {
+  const tagsWithStats = await getTagsWithStats();
+  return tagsWithStats.slice(0, limit);
+}
+
+// Delete post (soft delete)
+export async function deletePost(postId: string) {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from('posts')
+    .update({ 
+      deleted_at: new Date().toISOString(),
+      status: 'archived'
+    })
+    .eq('id', postId);
+
+  if (error) {
+    console.error('Error deleting post:', error);
+    return { success: false, error };
+  }
+
+  return { success: true };
 }

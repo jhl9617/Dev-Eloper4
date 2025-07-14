@@ -1,17 +1,109 @@
 "use client";
 
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Link } from '@/i18n/routing';
+import { createClient } from '@/lib/supabase/client';
+import type { CategoryWithStats, TagWithStats } from '@/lib/blog';
+import { getTranslatedCategoryName, getTranslatedCategoryDescription, getTranslatedTagName } from '@/lib/translations';
 
 export default function SearchPage() {
   const t = useTranslations();
+  const tSearch = useTranslations('search');
+  const tCategories = useTranslations('categories');
+  const tCategoryDescriptions = useTranslations('categoryDescriptions');
+  const tTags = useTranslations('tags');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const [popularCategories, setPopularCategories] = useState<CategoryWithStats[]>([]);
+  const [trendingTags, setTrendingTags] = useState<TagWithStats[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const supabase = createClient();
+      
+      // Fetch categories with stats
+      const { data: categoriesData } = await supabase
+        .from('categories')
+        .select(`
+          *,
+          posts!inner(id)
+        `)
+        .is('deleted_at', null)
+        .eq('posts.status', 'published')
+        .is('posts.deleted_at', null)
+        .limit(6);
+
+      if (categoriesData) {
+        const categoryStats = new Map<string, number>();
+        categoriesData.forEach(item => {
+          const count = categoryStats.get(item.id.toString()) || 0;
+          categoryStats.set(item.id.toString(), count + 1);
+        });
+
+        const uniqueCategories = new Map();
+        categoriesData.forEach(item => {
+          if (!uniqueCategories.has(item.id)) {
+            uniqueCategories.set(item.id, {
+              ...item,
+              post_count: categoryStats.get(item.id.toString()) || 0
+            });
+          }
+        });
+
+        const sortedCategories = Array.from(uniqueCategories.values())
+          .sort((a: any, b: any) => b.post_count - a.post_count)
+          .slice(0, 6);
+        
+        setPopularCategories(sortedCategories);
+      }
+
+      // Fetch trending tags
+      const { data: tagsData } = await supabase
+        .from('tags')
+        .select(`
+          *,
+          post_tags!inner(
+            posts!inner(id)
+          )
+        `)
+        .is('deleted_at', null)
+        .eq('post_tags.posts.status', 'published')
+        .is('post_tags.posts.deleted_at', null)
+        .limit(8);
+
+      if (tagsData) {
+        const tagStats = new Map<string, number>();
+        tagsData.forEach(item => {
+          const count = tagStats.get(item.id.toString()) || 0;
+          tagStats.set(item.id.toString(), count + 1);
+        });
+
+        const uniqueTags = new Map();
+        tagsData.forEach(item => {
+          if (!uniqueTags.has(item.id)) {
+            uniqueTags.set(item.id, {
+              ...item,
+              post_count: tagStats.get(item.id.toString()) || 0
+            });
+          }
+        });
+
+        const sortedTags = Array.from(uniqueTags.values())
+          .sort((a: any, b: any) => b.post_count - a.post_count)
+          .slice(0, 8);
+        
+        setTrendingTags(sortedTags);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,7 +135,7 @@ export default function SearchPage() {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
                   type="text"
-                  placeholder={t('search.searchPlaceholder')}
+                  placeholder={tSearch('searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -61,10 +153,10 @@ export default function SearchPage() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-semibold">
-                {t('search.searchResults')}
+                {tSearch('searchResults')}
               </h2>
               <span className="text-muted-foreground">
-                {t('search.foundResults', { count: 0 })}
+                {tSearch('foundResults', { count: 0 })}
               </span>
             </div>
 
@@ -75,7 +167,7 @@ export default function SearchPage() {
                   <Search className="h-12 w-12 text-muted-foreground mx-auto" />
                   <div>
                     <h3 className="text-lg font-semibold mb-2">
-                      {t('search.noResults')} &quot;{searchQuery}&quot;
+                      {tSearch('noResults')} &quot;{searchQuery}&quot;
                     </h3>
                     <p className="text-muted-foreground">
                       Try different keywords or browse our categories
@@ -90,25 +182,24 @@ export default function SearchPage() {
         {/* Popular Categories */}
         {!searchQuery && (
           <div className="space-y-6">
-            <h2 className="text-2xl font-semibold">Popular Categories</h2>
+            <h2 className="text-2xl font-semibold">{tSearch('popularCategories')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[
-                { name: 'Frontend', count: 15, description: 'React, Vue, Angular' },
-                { name: 'Backend', count: 12, description: 'Node.js, Python, Java' },
-                { name: 'DevOps', count: 8, description: 'Docker, Kubernetes, CI/CD' },
-                { name: 'Database', count: 6, description: 'SQL, NoSQL, Redis' },
-                { name: 'Mobile', count: 9, description: 'React Native, Flutter' },
-                { name: 'AI/ML', count: 7, description: 'TensorFlow, PyTorch' }
-              ].map((category) => (
-                <Card key={category.name} className="hover:shadow-md transition-shadow cursor-pointer">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-lg">{category.name}</CardTitle>
-                      <Badge variant="secondary">{category.count}</Badge>
-                    </div>
-                    <CardDescription>{category.description}</CardDescription>
-                  </CardHeader>
-                </Card>
+              {popularCategories.map((category) => (
+                <Link key={category.id} href={`/categories/${category.slug}`}>
+                  <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg">
+                          {getTranslatedCategoryName(category.slug, tCategories, category.name)}
+                        </CardTitle>
+                        <Badge variant="secondary">{category.post_count}</Badge>
+                      </div>
+                      <CardDescription>
+                        {getTranslatedCategoryDescription(category.slug, tCategoryDescriptions, `Explore articles about ${category.name.toLowerCase()}`)}
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                </Link>
               ))}
             </div>
           </div>
@@ -117,26 +208,17 @@ export default function SearchPage() {
         {/* Recent Searches */}
         {!searchQuery && (
           <div className="space-y-6">
-            <h2 className="text-2xl font-semibold">Trending Topics</h2>
+            <h2 className="text-2xl font-semibold">{tSearch('trendingTopics')}</h2>
             <div className="flex flex-wrap gap-2">
-              {[
-                'Next.js 15',
-                'React 19',
-                'TypeScript',
-                'Tailwind CSS',
-                'Supabase',
-                'Vercel',
-                'Docker',
-                'Kubernetes'
-              ].map((topic) => (
-                <Badge 
-                  key={topic} 
-                  variant="outline" 
-                  className="cursor-pointer hover:bg-accent"
-                  onClick={() => setSearchQuery(topic)}
-                >
-                  {topic}
-                </Badge>
+              {trendingTags.map((tag) => (
+                <Link key={tag.id} href={`/tags/${tag.slug}`}>
+                  <Badge 
+                    variant="outline" 
+                    className="cursor-pointer hover:bg-accent"
+                  >
+                    {getTranslatedTagName(tag.slug, tTags, tag.name)} ({tag.post_count})
+                  </Badge>
+                </Link>
               ))}
             </div>
           </div>

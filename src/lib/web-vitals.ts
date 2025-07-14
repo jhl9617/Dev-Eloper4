@@ -2,10 +2,10 @@ import { onCLS, onINP, onFCP, onLCP, onTTFB } from 'web-vitals';
 
 function sendToAnalytics(metric: any) {
   // In a real app, you would send this to your analytics service
-  // For now, we'll just log to console in development
-  if (process.env.NODE_ENV === 'development') {
-    console.log('Web Vitals:', metric);
-  }
+  // Disabled console logging in development to reduce noise
+  // if (process.env.NODE_ENV === 'development') {
+  //   console.log('Web Vitals:', metric);
+  // }
   
   // Example: Send to Google Analytics
   if (typeof window !== 'undefined' && (window as any).gtag) {

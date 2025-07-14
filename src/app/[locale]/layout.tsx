@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import Providers from './providers';
+import { routing } from '@/i18n/routing';
 import { Header } from '@/components/shared/header';
 import { Footer } from '@/components/shared/footer';
 import { Toaster } from '@/components/ui/toaster';
 import { WebVitals } from '@/components/web-vitals';
-import { routing } from '@/i18n/routing';
+import Providers from './providers';
 
 type Props = {
   children: React.ReactNode;
@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     keywords: t('keywords').split(', '),
     authors: [{ name: 'DevBlog' }],
     creator: 'DevBlog',
-    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001'),
     alternates: {
       canonical: '/',
       languages: {
@@ -84,20 +84,16 @@ export default async function LocaleLayout({ children, params }: Props) {
   const messages = await getMessages();
 
   return (
-    <html lang={locale} suppressHydrationWarning>
-      <body className="antialiased min-h-screen flex flex-col">
-        <NextIntlClientProvider messages={messages}>
-          <Providers>
-            <Header />
-            <main className="flex-1">
-              {children}
-            </main>
-            <Footer />
-            <Toaster />
-            <WebVitals />
-          </Providers>
-        </NextIntlClientProvider>
-      </body>
-    </html>
+    <NextIntlClientProvider messages={messages}>
+      <Providers>
+        <Header />
+        <main className="flex-1">
+          {children}
+        </main>
+        <Footer />
+        <Toaster />
+        <WebVitals />
+      </Providers>
+    </NextIntlClientProvider>
   );
 }

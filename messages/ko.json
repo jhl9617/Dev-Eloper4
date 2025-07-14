@@ -58,7 +58,9 @@
     "filterByTag": "태그별 필터",
     "allCategories": "모든 카테고리",
     "allTags": "모든 태그",
-    "clearFilters": "필터 초기화"
+    "clearFilters": "필터 초기화",
+    "popularCategories": "인기 카테고리",
+    "trendingTopics": "인기 주제"
   },
   "admin": {
     "dashboard": "대시보드",
@@ -87,7 +89,9 @@
     "postPublished": "포스트가 성공적으로 게시되었습니다",
     "confirmDelete": "정말로 이 포스트를 삭제하시겠습니까?",
     "uploadImage": "이미지 업로드",
-    "imageUploaded": "이미지가 성공적으로 업로드되었습니다"
+    "imageUploaded": "이미지가 성공적으로 업로드되었습니다",
+    "totalArticles": "총 아티클 수",
+    "popularBadge": "인기"
   },
   "auth": {
     "email": "이메일",
@@ -127,5 +131,71 @@
     "weeksAgo": "{count}주 전",
     "monthsAgo": "{count}개월 전",
     "yearsAgo": "{count}년 전"
+  },
+  "categories": {
+    "programming": "프로그래밍",
+    "web-development": "웹 개발",
+    "devops": "데브옵스",
+    "tutorial": "튜토리얼",
+    "frontend": "프론트엔드",
+    "backend": "백엔드",
+    "database": "데이터베이스",
+    "mobile": "모바일",
+    "ai-ml": "인공지능/머신러닝",
+    "security": "보안",
+    "testing": "테스팅",
+    "design": "디자인"
+  },
+  "categoryDescriptions": {
+    "programming": "프로그래밍 튜토리얼과 팁",
+    "web-development": "프론트엔드 및 백엔드 개발",
+    "devops": "데브옵스와 인프라",
+    "tutorial": "단계별 튜토리얼",
+    "frontend": "사용자 인터페이스 및 클라이언트 사이드 개발",
+    "backend": "서버 사이드 개발과 API",
+    "database": "데이터베이스 설계와 관리",
+    "mobile": "모바일 앱 개발",
+    "ai-ml": "인공지능과 머신러닝",
+    "security": "사이버 보안과 애플리케이션 보안",
+    "testing": "소프트웨어 테스팅과 품질 보증",
+    "design": "UI/UX 디자인과 원칙"
+  },
+  "tags": {
+    "javascript": "자바스크립트",
+    "typescript": "타입스크립트",
+    "react": "리액트",
+    "nextjs": "Next.js",
+    "nodejs": "Node.js",
+    "python": "파이썬",
+    "vue": "Vue.js",
+    "angular": "앵귤러",
+    "docker": "도커",
+    "kubernetes": "쿠버네티스",
+    "aws": "AWS",
+    "tailwindcss": "Tailwind CSS",
+    "supabase": "Supabase",
+    "mongodb": "MongoDB",
+    "postgresql": "PostgreSQL",
+    "redis": "Redis",
+    "graphql": "GraphQL",
+    "rest-api": "REST API",
+    "jwt": "JWT",
+    "oauth": "OAuth",
+    "css": "CSS",
+    "backend": "백엔드",
+    "frontend": "프론트엔드",
+    "html": "HTML",
+    "sass": "Sass",
+    "scss": "SCSS",
+    "webpack": "웹팩",
+    "vite": "Vite",
+    "eslint": "ESLint",
+    "prettier": "Prettier",
+    "git": "Git",
+    "github": "GitHub",
+    "gitlab": "GitLab",
+    "vercel": "Vercel",
+    "netlify": "Netlify",
+    "firebase": "Firebase"
   }
 }
