@@ -374,7 +374,7 @@ export default function CategoriesPage() {
       <div className="container py-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
-          <p className="text-muted-foreground">You don't have permission to access this page.</p>
+          <p className="text-muted-foreground">You don&apos;t have permission to access this page.</p>
         </div>
         <div className="mt-4 p-4 bg-muted rounded-lg">
           <p className="text-sm">디버그 정보:</p>
