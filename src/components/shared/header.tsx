@@ -22,7 +22,7 @@ function AuthButton() {
 
   if (loading) {
     return (
-      <Button variant="ghost" size="sm" disabled>
+      <Button variant="ghost" size="sm" disabled className="h-9 w-9 rounded-full">
         <User className="h-4 w-4" />
       </Button>
     );
@@ -30,7 +30,7 @@ function AuthButton() {
 
   if (!user) {
     return (
-      <Button variant="ghost" size="sm" asChild>
+      <Button variant="ghost" size="sm" asChild className="h-9 w-9 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200">
         <Link href="/auth/login">
           <User className="h-4 w-4" />
           <span className="sr-only">{t('login')}</span>
@@ -42,7 +42,7 @@ function AuthButton() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm">
+        <Button variant="ghost" size="sm" className="h-9 w-9 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200">
           <User className="h-4 w-4" />
           <span className="sr-only">User menu</span>
         </Button>
@@ -88,30 +88,33 @@ export function Header() {
 
   return (
     <motion.header 
-      className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+      className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/70"
       variants={headerVariants}
       animate={shouldHideHeader ? 'hidden' : 'visible'}
-      transition={{ duration: 0.3, ease: 'easeInOut' }}
+      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
       style={{
-        backdropFilter: isAtTop ? 'none' : 'blur(12px)',
+        backdropFilter: isAtTop ? 'none' : 'blur(20px)',
         borderBottomColor: isAtTop ? 'transparent' : 'hsl(var(--border))',
+        boxShadow: isAtTop ? 'none' : '0 1px 0 0 hsl(var(--border))',
       }}
     >
-      <div className="container flex h-14 items-center">
+      <div className="container flex h-16 items-center px-6 lg:px-8">
         {/* Logo */}
-        <div className="mr-4 flex">
-          <Link href="/" className="mr-6 flex items-center space-x-2">
-            <span className="font-bold text-xl">DevBlog</span>
+        <div className="mr-8 flex">
+          <Link href="/" className="flex items-center space-x-2 group">
+            <span className="font-semibold text-xl tracking-tight text-foreground transition-colors group-hover:text-primary">
+              DevBlog
+            </span>
           </Link>
         </div>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
+        <nav className="hidden md:flex items-center space-x-8">
           {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="transition-colors hover:text-foreground/80 text-foreground/60"
+              className="text-sm font-medium text-foreground/70 transition-all duration-200 hover:text-foreground hover:scale-105 relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-0.5 after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
             >
               {item.label}
             </Link>
@@ -119,13 +122,15 @@ export function Header() {
         </nav>
 
         {/* Desktop Actions */}
-        <div className="ml-auto flex items-center space-x-4">
-          <div className="hidden md:block w-64">
+        <div className="ml-auto flex items-center space-x-3">
+          <div className="hidden lg:block w-72">
             <SearchInput placeholder={tSearch('searchPlaceholder')} />
           </div>
-          <ThemeToggle />
-          <LanguageToggle />
-          <AuthButton />
+          <div className="flex items-center space-x-2">
+            <ThemeToggle />
+            <LanguageToggle />
+            <AuthButton />
+          </div>
         </div>
 
         {/* Mobile Navigation */}
