@@ -2,7 +2,7 @@
 
 import { ThemeProvider } from '@/components/theme/theme-provider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { NoSSR } from '@/components/no-ssr';
+import { MotionProvider } from '@/components/motion/motion-provider';
 import { useState } from 'react';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
@@ -17,17 +17,18 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <NoSSR>
+      <MotionProvider>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
           storageKey="devblog-theme"
+          suppressHydrationWarning
         >
           {children}
         </ThemeProvider>
-      </NoSSR>
+      </MotionProvider>
     </QueryClientProvider>
   );
 }

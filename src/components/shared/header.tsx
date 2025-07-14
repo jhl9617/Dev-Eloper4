@@ -1,16 +1,19 @@
 'use client';
 
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Menu, Search, User, LogOut, Settings } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
+import { useScroll } from '@/hooks/use-scroll';
 import { SearchInput } from '@/components/search/search-input';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { LanguageToggle } from '@/components/shared/language-toggle';
 import { Link } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
+import { headerVariants } from '@/lib/animations';
 
 function AuthButton() {
   const { user, isAdmin, signOut, loading } = useAuth();
@@ -73,6 +76,7 @@ export function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const t = useTranslations('navigation');
   const tSearch = useTranslations('search');
+  const { scrollDirection, isAtTop, scrollY } = useScroll();
 
   const navItems = [
     { href: '/', label: t('home') },
@@ -80,8 +84,19 @@ export function Header() {
     { href: '/about', label: t('about') },
   ];
 
+  const shouldHideHeader = scrollDirection === 'down' && scrollY > 100;
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <motion.header 
+      className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+      variants={headerVariants}
+      animate={shouldHideHeader ? 'hidden' : 'visible'}
+      transition={{ duration: 0.3, ease: 'easeInOut' }}
+      style={{
+        backdropFilter: isAtTop ? 'none' : 'blur(12px)',
+        borderBottomColor: isAtTop ? 'transparent' : 'hsl(var(--border))',
+      }}
+    >
       <div className="container flex h-14 items-center">
         {/* Logo */}
         <div className="mr-4 flex">
@@ -159,6 +174,6 @@ export function Header() {
           </SheetContent>
         </Sheet>
       </div>
-    </header>
+    </motion.header>
   );
 }

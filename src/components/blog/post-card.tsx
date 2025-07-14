@@ -3,20 +3,24 @@
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { memo, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { MotionBadge } from '@/components/ui/motion-badge';
 import { LazyImage } from '@/components/ui/lazy-image';
 import { HtmlPreview } from '@/components/blog/html-content';
 import { getPostThumbnail } from '@/lib/utils/html-utils';
 import { CalendarDays, Clock, User, ImageIcon } from 'lucide-react';
+import { cardVariants, getReducedMotionVariants } from '@/lib/animations';
 import type { PostWithRelations } from '@/lib/blog';
 
 interface PostCardProps {
   post: any;
   priority?: boolean;
+  index?: number;
 }
 
-export const PostCard = memo(function PostCard({ post, priority = false }: PostCardProps) {
+export const PostCard = memo(function PostCard({ post, priority = false, index = 0 }: PostCardProps) {
   const { publishedDate, readingTime, thumbnailUrl } = useMemo(() => {
     const publishedDate = post.published_at 
       ? new Date(post.published_at) 
@@ -33,27 +37,49 @@ export const PostCard = memo(function PostCard({ post, priority = false }: PostC
     return { publishedDate, readingTime, thumbnailUrl };
   }, [post.content, post.published_at, post.created_at, post.cover_image_path]);
 
+  const motionVariants = getReducedMotionVariants(cardVariants);
+
   return (
-    <Card className="h-full flex flex-col transition-shadow hover:shadow-lg">
-      {/* Thumbnail Section */}
-      <Link href={`/posts/${post.slug}`} className="block">
-        <div className="aspect-[16/9] overflow-hidden rounded-t-lg relative">
-          {thumbnailUrl ? (
-            <LazyImage
-              src={thumbnailUrl}
-              alt={post.title}
-              className="h-full w-full object-cover transition-transform hover:scale-105"
-              width={400}
-              height={225}
-              priority={priority}
-            />
-          ) : (
-            <div className="h-full w-full bg-muted flex items-center justify-center">
-              <ImageIcon className="h-12 w-12 text-muted-foreground" />
-            </div>
-          )}
-        </div>
-      </Link>
+    <motion.div
+      variants={motionVariants}
+      initial="hidden"
+      animate="visible"
+      whileHover="hover"
+      whileTap="tap"
+      custom={index}
+      transition={{
+        delay: index * 0.1,
+      }}
+      className="h-full"
+    >
+      <Card className="h-full flex flex-col transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 border-border/50 hover:border-primary/20 bg-card/50 backdrop-blur-sm group">
+        {/* Thumbnail Section */}
+        <Link href={`/posts/${post.slug}`} className="block">
+          <div className="aspect-[16/9] overflow-hidden rounded-t-lg relative">
+            {thumbnailUrl ? (
+              <motion.div
+                className="h-full w-full"
+                whileHover={{ scale: 1.05 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              >
+                <LazyImage
+                  src={thumbnailUrl}
+                  alt={post.title}
+                  className="h-full w-full object-cover"
+                  width={400}
+                  height={225}
+                  priority={priority}
+                />
+              </motion.div>
+            ) : (
+              <div className="h-full w-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
+                <ImageIcon className="h-12 w-12 text-muted-foreground/60 animate-pulse" />
+              </div>
+            )}
+            {/* Overlay gradient */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          </div>
+        </Link>
       
       <CardHeader className="flex-1">
         <div className="space-y-2">
@@ -62,16 +88,19 @@ export const PostCard = memo(function PostCard({ post, priority = false }: PostC
               href={`/categories/${post.category.slug}`}
               className="inline-block"
             >
-              <Badge variant="secondary" className="hover:bg-secondary/80">
+              <MotionBadge variant="secondary">
                 {post.category.name}
-              </Badge>
+              </MotionBadge>
             </Link>
           )}
           
           <Link href={`/posts/${post.slug}`} className="block group">
-            <h3 className="text-xl font-semibold line-clamp-2 group-hover:text-primary transition-colors">
+            <motion.h3 
+              className="text-xl font-semibold line-clamp-2 group-hover:text-primary transition-colors"
+              layoutId={`title-${post.id}`}
+            >
               {post.title}
-            </h3>
+            </motion.h3>
           </Link>
         </div>
       </CardHeader>
@@ -91,15 +120,15 @@ export const PostCard = memo(function PostCard({ post, priority = false }: PostC
           <div className="flex flex-wrap gap-1 w-full">
             {post.tags.slice(0, 3).map((tag) => (
               <Link key={tag.id} href={`/tags/${tag.slug}`}>
-                <Badge variant="outline" className="text-xs hover:bg-accent">
+                <MotionBadge variant="outline" className="text-xs">
                   {tag.name}
-                </Badge>
+                </MotionBadge>
               </Link>
             ))}
             {post.tags.length > 3 && (
-              <Badge variant="outline" className="text-xs">
+              <MotionBadge variant="outline" className="text-xs">
                 +{post.tags.length - 3}
-              </Badge>
+              </MotionBadge>
             )}
           </div>
         )}
@@ -117,6 +146,7 @@ export const PostCard = memo(function PostCard({ post, priority = false }: PostC
           </div>
         </div>
       </CardFooter>
-    </Card>
+      </Card>
+    </motion.div>
   );
 });

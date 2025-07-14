@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { 
   DropdownMenu, 
@@ -23,6 +24,7 @@ import {
 import { MoreHorizontal, Edit, Trash2, Settings } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { deletePost } from '@/lib/blog';
+import { buttonVariants, modalVariants, dropdownVariants } from '@/lib/animations';
 import type { PostWithRelations } from '@/lib/blog';
 
 interface AdminActionsProps {
@@ -71,11 +73,28 @@ export function AdminActions({ post }: AdminActionsProps) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm">
-            <Settings className="h-4 w-4 mr-2" />
-            관리
-            <MoreHorizontal className="h-4 w-4 ml-2" />
-          </Button>
+          <motion.div
+            variants={buttonVariants}
+            initial="initial"
+            whileHover="hover"
+            whileTap="tap"
+          >
+            <Button variant="outline" size="sm" className="group">
+              <motion.div
+                animate={{ rotate: [0, 180, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <Settings className="h-4 w-4 mr-2" />
+              </motion.div>
+              관리
+              <motion.div
+                animate={{ rotate: [-90, 90, -90] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <MoreHorizontal className="h-4 w-4 ml-2" />
+              </motion.div>
+            </Button>
+          </motion.div>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={handleEdit}>
@@ -93,26 +112,63 @@ export function AdminActions({ post }: AdminActionsProps) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>포스트를 삭제하시겠습니까?</AlertDialogTitle>
-            <AlertDialogDescription>
-              이 작업은 되돌릴 수 없습니다. 포스트 "{post.title}"이(가) 영구적으로 삭제됩니다.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>취소</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {isDeleting ? '삭제 중...' : '삭제'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <AnimatePresence>
+        {showDeleteDialog && (
+          <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+            <AlertDialogContent asChild>
+              <motion.div
+                variants={modalVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+              >
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="flex items-center gap-2">
+                    <motion.div
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 0.5, repeat: Infinity }}
+                    >
+                      <Trash2 className="h-5 w-5 text-destructive" />
+                    </motion.div>
+                    포스트를 삭제하시겠습니까?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    이 작업은 되돌릴 수 없습니다. 포스트 "{post.title}"이(가) 영구적으로 삭제됩니다.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <AlertDialogCancel disabled={isDeleting}>취소</AlertDialogCancel>
+                  </motion.div>
+                  <motion.div 
+                    whileHover={{ scale: 1.05 }} 
+                    whileTap={{ scale: 0.95 }}
+                    animate={isDeleting ? { scale: [1, 1.05, 1] } : {}}
+                    transition={isDeleting ? { duration: 0.5, repeat: Infinity } : {}}
+                  >
+                    <AlertDialogAction 
+                      onClick={handleDelete}
+                      disabled={isDeleting}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      {isDeleting ? (
+                        <motion.span
+                          animate={{ opacity: [1, 0.5, 1] }}
+                          transition={{ duration: 1, repeat: Infinity }}
+                        >
+                          삭제 중...
+                        </motion.span>
+                      ) : (
+                        '삭제'
+                      )}
+                    </AlertDialogAction>
+                  </motion.div>
+                </AlertDialogFooter>
+              </motion.div>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
+      </AnimatePresence>
     </>
   );
 }
