@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { getPostBySlug } from '@/lib/blog';
+import { getPostBySlug } from '@/lib/blog-server';
 import { PostHeader } from '@/components/blog/post-header';
 import { PostContent } from '@/components/blog/post-content';
 import { PostFooter } from '@/components/blog/post-footer';

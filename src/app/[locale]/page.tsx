@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { getPublishedPosts } from '@/lib/blog';
+import { getPublishedPosts } from '@/lib/blog-server';
 import { PostCard } from '@/components/blog/post-card';
 import { Button } from '@/components/ui/button';
 import { MotionButton } from '@/components/ui/motion-button';

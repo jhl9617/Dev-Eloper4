@@ -36,7 +36,8 @@
       "Bash(timeout 20 npm run build)",
       "Bash(timeout 15 npm run dev)",
       "Bash(timeout 15 npm run build)",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "Bash(timeout 300 npm run build)"
     ],
     "deny": []
   }

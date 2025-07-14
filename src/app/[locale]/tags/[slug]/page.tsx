@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getPostsByTag, getTags } from '@/lib/blog';
+import { getPostsByTag, getTags } from '@/lib/blog-server';
 import { PostCard } from '@/components/blog/post-card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';

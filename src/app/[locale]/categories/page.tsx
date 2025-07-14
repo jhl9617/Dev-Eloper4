@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { getCategoriesWithStats, getTrendingTags } from '@/lib/blog';
+import { getCategoriesWithStats, getTrendingTags } from '@/lib/blog-server';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { BookOpen, Users, TrendingUp } from 'lucide-react';

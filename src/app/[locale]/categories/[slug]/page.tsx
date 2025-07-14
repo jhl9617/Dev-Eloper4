@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getPostsByCategory, getCategories } from '@/lib/blog';
+import { getPostsByCategory, getCategories } from '@/lib/blog-server';
 import { PostCard } from '@/components/blog/post-card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight, Folder } from 'lucide-react';
