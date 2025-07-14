@@ -1,4 +1,4 @@
-import { createClient } from './supabase/server';
+import { createPublicClient } from './supabase/server';
 import type { Database } from '@/types/database';
 
 type Post = Database['public']['Tables']['posts']['Row'];
@@ -22,7 +22,7 @@ export interface TagWithStats extends Tag {
 
 // Get published posts for public display
 export async function getPublishedPosts(limit = 10, offset = 0) {
-  const supabase = await createClient();
+  const supabase = await createPublicClient();
   const { data, error, count } = await supabase
     .from('posts')
     .select(`
@@ -51,7 +51,7 @@ export async function getPublishedPosts(limit = 10, offset = 0) {
 
 // Get single post by slug
 export async function getPostBySlug(slug: string): Promise<PostWithRelations | null> {
-  const supabase = await createClient();
+  const supabase = await createPublicClient();
   const { data, error } = await supabase
     .from('posts')
     .select(`
@@ -80,7 +80,7 @@ export async function getPostBySlug(slug: string): Promise<PostWithRelations | n
 
 // Get posts by category
 export async function getPostsByCategory(categorySlug: string, limit = 10, offset = 0) {
-  const supabase = await createClient();
+  const supabase = await createPublicClient();
   const { data, error, count } = await supabase
     .from('posts')
     .select(`
@@ -109,7 +109,7 @@ export async function getPostsByCategory(categorySlug: string, limit = 10, offse
 
 // Get posts by tag
 export async function getPostsByTag(tagSlug: string, limit = 10, offset = 0) {
-  const supabase = await createClient();
+  const supabase = await createPublicClient();
   const { data, error, count } = await supabase
     .from('posts')
     .select(`
@@ -138,7 +138,7 @@ export async function getPostsByTag(tagSlug: string, limit = 10, offset = 0) {
 
 // Get all categories
 export async function getCategories() {
-  const supabase = await createClient();
+  const supabase = await createPublicClient();
   const { data, error } = await supabase
     .from('categories')
     .select('*')
@@ -155,7 +155,7 @@ export async function getCategories() {
 
 // Get all tags
 export async function getTags() {
-  const supabase = await createClient();
+  const supabase = await createPublicClient();
   const { data, error } = await supabase
     .from('tags')
     .select('*')
@@ -172,7 +172,7 @@ export async function getTags() {
 
 // Get categories with post counts
 export async function getCategoriesWithStats(): Promise<CategoryWithStats[]> {
-  const supabase = await createClient();
+  const supabase = await createPublicClient();
   const { data, error } = await supabase
     .from('categories')
     .select(`
@@ -217,7 +217,7 @@ export async function getPopularCategories(limit = 6): Promise<CategoryWithStats
 
 // Get tags with post counts
 export async function getTagsWithStats(): Promise<TagWithStats[]> {
-  const supabase = await createClient();
+  const supabase = await createPublicClient();
   const { data, error } = await supabase
     .from('tags')
     .select(`
