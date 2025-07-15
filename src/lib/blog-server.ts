@@ -22,7 +22,7 @@ export interface TagWithStats extends Tag {
 
 // Get published posts for public display
 export async function getPublishedPosts(limit = 10, offset = 0) {
-  const supabase = await createPublicClient();
+  const supabase = createPublicClient();
   const { data, error, count } = await supabase
     .from('posts')
     .select(`
@@ -51,36 +51,45 @@ export async function getPublishedPosts(limit = 10, offset = 0) {
 
 // Get single post by slug
 export async function getPostBySlug(slug: string): Promise<PostWithRelations | null> {
-  const supabase = await createPublicClient();
-  const { data, error } = await supabase
-    .from('posts')
-    .select(`
-      *,
-      category:categories(*),
-      post_tags(tag:tags(*))
-    `)
-    .eq('slug', slug)
-    .eq('status', 'published')
-    .is('deleted_at', null)
-    .single();
+  try {
+    const supabase = createPublicClient();
+    const { data, error } = await supabase
+      .from('posts')
+      .select(`
+        *,
+        category:categories(*),
+        post_tags(tag:tags(*))
+      `)
+      .eq('slug', slug)
+      .eq('status', 'published')
+      .is('deleted_at', null)
+      .single();
 
-  if (error) {
-    console.error('Error fetching post:', error);
+    if (error) {
+      console.error('Error fetching post:', error);
+      return null;
+    }
+
+    if (!data) {
+      return null;
+    }
+
+    // Transform the data to include tags array
+    const post: PostWithRelations = {
+      ...data,
+      tags: data.post_tags?.map(pt => pt.tag).filter(Boolean) || []
+    };
+
+    return post;
+  } catch (error) {
+    console.error('Unexpected error fetching post:', error);
     return null;
   }
-
-  // Transform the data to include tags array
-  const post: PostWithRelations = {
-    ...data,
-    tags: data.post_tags?.map(pt => pt.tag).filter(Boolean) || []
-  };
-
-  return post;
 }
 
 // Get posts by category
 export async function getPostsByCategory(categorySlug: string, limit = 10, offset = 0) {
-  const supabase = await createPublicClient();
+  const supabase = createPublicClient();
   const { data, error, count } = await supabase
     .from('posts')
     .select(`
@@ -109,7 +118,7 @@ export async function getPostsByCategory(categorySlug: string, limit = 10, offse
 
 // Get posts by tag
 export async function getPostsByTag(tagSlug: string, limit = 10, offset = 0) {
-  const supabase = await createPublicClient();
+  const supabase = createPublicClient();
   const { data, error, count } = await supabase
     .from('posts')
     .select(`
@@ -138,7 +147,7 @@ export async function getPostsByTag(tagSlug: string, limit = 10, offset = 0) {
 
 // Get all categories
 export async function getCategories() {
-  const supabase = await createPublicClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from('categories')
     .select('*')
@@ -155,7 +164,7 @@ export async function getCategories() {
 
 // Get all tags
 export async function getTags() {
-  const supabase = await createPublicClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from('tags')
     .select('*')
@@ -172,7 +181,7 @@ export async function getTags() {
 
 // Get categories with post counts
 export async function getCategoriesWithStats(): Promise<CategoryWithStats[]> {
-  const supabase = await createPublicClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from('categories')
     .select(`
@@ -217,7 +226,7 @@ export async function getPopularCategories(limit = 6): Promise<CategoryWithStats
 
 // Get tags with post counts
 export async function getTagsWithStats(): Promise<TagWithStats[]> {
-  const supabase = await createPublicClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from('tags')
     .select(`

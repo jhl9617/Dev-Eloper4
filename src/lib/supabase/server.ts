@@ -2,12 +2,25 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import type { Database } from '@/types/database'
 
+// Environment variable validation
+function validateEnvVars() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  
+  if (!url || !key) {
+    throw new Error('Missing required Supabase environment variables');
+  }
+  
+  return { url, key };
+}
+
 export async function createClient() {
+  const { url, key } = validateEnvVars();
   const cookieStore = await cookies()
 
   return createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    url,
+    key,
     {
       cookies: {
         getAll() {
@@ -31,10 +44,12 @@ export async function createClient() {
 }
 
 // Create a simplified client for public read-only operations
-export async function createPublicClient() {
+export function createPublicClient() {
+  const { url, key } = validateEnvVars();
+  
   return createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    url,
+    key,
     {
       cookies: {
         getAll() {
