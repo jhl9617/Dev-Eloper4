@@ -1,92 +1,251 @@
-이 프로젝트는 [`EasyNext`](https://github.com/easynext/easynext)를 사용해 생성된 [Next.js](https://nextjs.org) 프로젝트입니다.
+# Dev-eloper Blog
 
-## Getting Started
+> Modern blog platform providing elegant writing experience for developers.
 
-개발 서버를 실행합니다.<br/>
-환경에 따른 명령어를 사용해주세요.
+![Dev-eloper](https://img.shields.io/badge/Dev--eloper-Modern%20Blog-blue)
+![Next.js](https://img.shields.io/badge/Next.js-15-black)
+![React](https://img.shields.io/badge/React-19-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-3.4-38bdf8)
+
+## 🚀 Project Overview
+
+**Dev-eloper** is a modern blog platform built with Next.js 15 and Supabase. It allows a single administrator to create, manage, and publish Markdown-based articles while providing visitors with an elegant reading and discovery experience.
+
+### ✨ Key Features
+
+- 📝 **Markdown Editor**: Intuitive WYSIWYG editor based on TipTap
+- 🎨 **Responsive Design**: Perfect support for mobile, tablet, and desktop
+- 🌗 **Dark Mode**: Automatic light/dark theme switching
+- 🌍 **Internationalization**: Full Korean/English support (next-intl)
+- 🔍 **Advanced Search**: Real-time search by title, content, and tags
+- 🏷️ **Tag System**: Category and tag-based classification
+- 🔐 **Secure Authentication**: Supabase Auth-based admin authentication
+- ⚡ **Performance Optimization**: Image optimization, lazy loading, SSR/SSG
+- 📱 **PWA Support**: Offline reading and installable
+- 🎭 **Animations**: Smooth transitions with Framer Motion
+
+## 🛠️ Tech Stack
+
+### Frontend
+- **Next.js 15** - App Router, React Server Components
+- **React 19** - Latest React features
+- **TypeScript** - Type safety
+- **Tailwind CSS** - Utility-based styling
+- **shadcn/ui** - Reusable UI components
+- **Framer Motion** - High-performance animations
+
+### Backend & Database
+- **Supabase** - Authentication, database, storage
+- **PostgreSQL** - Powerful relational database
+- **Row Level Security** - Data security
+
+### Development Tools
+- **ESLint** - Code quality management
+- **Prettier** - Code formatting
+
+### Deployment & Hosting
+- **Vercel** - Optimized deployment environment
+- **Supabase** - Backend services
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18.0.0 or higher
+- npm or yarn
+- Supabase account
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-username/dev-eloper.git
+   cd dev-eloper
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Environment setup**
+   ```bash
+   cp .env.example .env.local
+   ```
+
+   Edit the `.env.local` file and set the required values:
+   ```env
+   # Supabase Configuration
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+   # Site Configuration
+   NEXT_PUBLIC_SITE_URL=https://www.dev-eloper.site
+
+   # Optional: Analytics
+   GOOGLE_ANALYTICS_ID=your_ga_id
+   ```
+
+4. **Database setup**
+   
+   Run the following SQL in your Supabase project:
+   ```bash
+   # Create database schema
+   psql -h your-supabase-host -U postgres -d postgres -f docs/database-complete.sql
+   ```
+
+5. **Start development server**
+   ```bash
+   npm run dev
+   ```
+
+   Open [http://localhost:3000](http://localhost:3000) in your browser to see the result.
+
+## 📁 Project Structure
+
+```
+Dev-Eloper4/
+├── src/
+│   ├── app/                    # Next.js App Router
+│   │   ├── [locale]/          # Internationalization routing
+│   │   ├── api/               # API routes
+│   │   └── globals.css        # Global styles
+│   ├── components/            # Reusable components
+│   │   ├── ui/               # shadcn/ui components
+│   │   ├── blog/             # Blog-related components
+│   │   ├── admin/            # Admin components
+│   │   └── shared/           # Shared components
+│   ├── hooks/                # Custom hooks
+│   ├── lib/                  # Utility functions
+│   ├── types/                # TypeScript type definitions
+│   └── styles/               # Additional styles
+├── public/                   # Static files
+├── docs/                     # Project documentation
+├── messages/                 # Internationalization messages
+└── supabase/                # Supabase-related files
+```
+
+## 💻 Development Commands
 
 ```bash
+# Start development server (with Turbopack)
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Production build
+npm run build
+
+# Start production server
+npm start
+
+# Lint code
+npm run lint
 ```
 
-브라우저에서 [http://localhost:3000](http://localhost:3000)을 열어 결과를 확인할 수 있습니다.
+## 🎯 Main Features
 
-`app/page.tsx` 파일을 수정하여 페이지를 편집할 수 있습니다. 파일을 수정하면 자동으로 페이지가 업데이트됩니다.
+### Admin Features
+- **Secure Login**: JWT-based authentication system
+- **Post Management**: Create, edit, delete, publish/unpublish
+- **Image Upload**: Supabase Storage integration
+- **Tags & Categories**: Classification system with autocomplete
+- **Draft Saving**: Auto-save and preview functionality
 
-## 기본 포함 라이브러리
+### Visitor Features
+- **Responsive Design**: Optimized experience on all devices
+- **Real-time Search**: Search by title, content, and tags
+- **Category Filtering**: Explore posts by topic
+- **Social Sharing**: Social media sharing features
+- **RSS Feed**: RSS support for subscribers
 
-- [Next.js](https://nextjs.org)
-- [React](https://react.dev)
-- [Tailwind CSS](https://tailwindcss.com)
-- [TypeScript](https://www.typescriptlang.org)
-- [ESLint](https://eslint.org)
-- [Prettier](https://prettier.io)
-- [Shadcn UI](https://ui.shadcn.com)
-- [Lucide Icon](https://lucide.dev)
-- [date-fns](https://date-fns.org)
-- [react-use](https://github.com/streamich/react-use)
-- [es-toolkit](https://github.com/toss/es-toolkit)
-- [Zod](https://zod.dev)
-- [React Query](https://tanstack.com/query/latest)
-- [React Hook Form](https://react-hook-form.com)
-- [TS Pattern](https://github.com/gvergnaud/ts-pattern)
+### Performance Optimization
+- **Image Optimization**: Next.js Image component usage
+- **Lazy Loading**: Scroll-based content loading
+- **Caching**: ISR (Incremental Static Regeneration) applied
+- **Core Web Vitals**: Targeting LCP < 1.5s, CLS < 0.1
 
-## 사용 가능한 명령어
+## 🌐 Deployment
 
-한글버전 사용
+### Vercel Deployment
 
-```sh
-easynext lang ko
+1. **Connect Vercel account**
+   ```bash
+   npx vercel
+   ```
+
+2. **Set environment variables**
+   Set the following environment variables in the Vercel dashboard:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+   - `NEXT_PUBLIC_SITE_URL`
+
+3. **Connect domain**
+   - Set up custom domain in Vercel
+   - SSL automatically applied after DNS setup
+
+### Environment Settings
+
+- **Development**: `http://localhost:3000`
+- **Staging**: `https://dev-eloper-staging.vercel.app`
+- **Production**: `https://www.dev-eloper.site`
+
+## 🧪 Testing
+
+```bash
+# Run unit tests
+npm run test
+
+# Run E2E tests
+npm run test:e2e
+
+# Check test coverage
+npm run test:coverage
 ```
 
-최신버전으로 업데이트
+## 📊 Monitoring & Analytics
 
-```sh
-npm i -g @easynext/cli@latest
-# or
-yarn add -g @easynext/cli@latest
-# or
-pnpm add -g @easynext/cli@latest
-```
+- **Web Vitals**: Real-time performance metrics monitoring
+- **Vercel Analytics**: User behavior analysis
+- **Sentry**: Error tracking and monitoring (optional)
 
-Supabase 설정
+## 🤝 Contributing
 
-```sh
-easynext supabase
-```
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-Next-Auth 설정
+### Development Guidelines
 
-```sh
-easynext auth
+- **Code Style**: Follow ESLint + Prettier configuration
+- **Commit Messages**: Follow [Conventional Commits](https://conventionalcommits.org/) rules
+- **Branch Strategy**: Apply Git Flow
+- **Testing**: Write test code for new features
 
-# ID,PW 로그인
-easynext auth idpw
-# 카카오 로그인
-easynext auth kakao
-```
+## 📝 License
 
-유용한 서비스 연동
+This project is distributed under the MIT License. See [LICENSE](LICENSE) file for more details.
 
-```sh
-# Google Analytics
-easynext gtag
+## 📞 Contact
 
-# Microsoft Clarity
-easynext clarity
+- **Website**: [https://www.dev-eloper.site](https://www.dev-eloper.site)
+- **Email**: contact@dev-eloper.site
+- **GitHub**: [https://github.com/your-username/dev-eloper](https://github.com/your-username/dev-eloper)
 
-# ChannelIO
-easynext channelio
+## 🙏 Acknowledgments
 
-# Sentry
-easynext sentry
+This project was built with the help of the following open source projects:
 
-# Google Adsense
-easynext adsense
-```
+- [Next.js](https://nextjs.org/)
+- [React](https://reactjs.org/)
+- [Supabase](https://supabase.com/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [shadcn/ui](https://ui.shadcn.com/)
+- [Framer Motion](https://www.framer.com/motion/)
+
+---
+
+Start your own development blog with **Dev-eloper**! 🚀
