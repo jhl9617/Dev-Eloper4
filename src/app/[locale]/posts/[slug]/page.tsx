@@ -7,6 +7,10 @@ import { PostFooter } from '@/components/blog/post-footer';
 import { JsonLd } from '@/components/seo/json-ld';
 import type { Metadata } from 'next';
 
+// 동적 페이지 생성 설정 (ISR 적용)
+export const dynamic = 'force-dynamic';
+export const revalidate = 3600; // 1시간마다 재검증
+
 interface PostPageProps {
   params: Promise<{
     locale: string;
