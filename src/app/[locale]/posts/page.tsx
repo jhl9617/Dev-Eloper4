@@ -18,10 +18,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const t = await getTranslations({ locale, namespace: 'blog' });
   
   return {
-    title: `${t('allPosts')} - DevBlog`,
+    title: `${t('allPosts')} - Dev-eloper`,
     description: 'Browse all blog posts about web development, programming, and technology.',
     openGraph: {
-      title: `${t('allPosts')} - DevBlog`,
+      title: `${t('allPosts')} - Dev-eloper`,
       description: 'Browse all blog posts about web development, programming, and technology.',
     },
   };

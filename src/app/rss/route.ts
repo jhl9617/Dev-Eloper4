@@ -19,8 +19,8 @@ export async function GET() {
   const rss = `<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>DevBlog</title>
-    <description>A modern blog platform built with Next.js and Supabase</description>
+    <title>Dev-eloper</title>
+    <description>Dev-eloper - A modern blog platform built with Next.js and Supabase</description>
     <link>${baseUrl}</link>
     <language>en-us</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>

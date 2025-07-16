@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "title": "Dec-Eloper - 모던 블로그 플랫폼",
+    "title": "Dev-eloper - 모던 블로그 플랫폼",
     "description": "Next.js와 Supabase로 구축된 모던 블로그 플랫폼입니다. 프로그래밍 인사이트, 튜토리얼, 기술 아티클을 발견해보세요.",
     "keywords": "블로그, nextjs, supabase, 타입스크립트, 프로그래밍, 웹 개발, 리액트, 튜토리얼"
   },

@@ -40,8 +40,8 @@ export function JsonLd({ type, post }: JsonLdProps) {
     const websiteData = {
       '@context': 'https://schema.org',
       '@type': 'WebSite',
-      name: 'DevBlog',
-      description: 'A modern blog platform built with Next.js and Supabase',
+      name: 'Dev-eloper',
+      description: 'Dev-eloper - A modern blog platform built with Next.js and Supabase',
       url: baseUrl,
       potentialAction: {
         '@type': 'SearchAction',
@@ -62,16 +62,16 @@ export function JsonLd({ type, post }: JsonLdProps) {
     const blogData = {
       '@context': 'https://schema.org',
       '@type': 'Blog',
-      name: 'DevBlog',
-      description: 'A modern blog platform built with Next.js and Supabase',
+      name: 'Dev-eloper',
+      description: 'Dev-eloper - A modern blog platform built with Next.js and Supabase',
       url: baseUrl,
       author: {
         '@type': 'Person',
-        name: 'DevBlog',
+        name: 'Dev-eloper',
       },
       publisher: {
         '@type': 'Organization',
-        name: 'DevBlog',
+        name: 'Dev-eloper',
         logo: {
           '@type': 'ImageObject',
           url: `${baseUrl}/logo.png`,
@@ -96,11 +96,11 @@ export function JsonLd({ type, post }: JsonLdProps) {
       description: description || post.title || 'No description available',
       author: {
         '@type': 'Person',
-        name: 'DevBlog',
+        name: 'Dev-eloper',
       },
       publisher: {
         '@type': 'Organization',
-        name: 'DevBlog',
+        name: 'Dev-eloper',
         logo: {
           '@type': 'ImageObject',
           url: `${baseUrl}/logo.png`,

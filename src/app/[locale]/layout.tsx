@@ -25,8 +25,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     },
     description: t('description'),
     keywords: t('keywords').split(', '),
-    authors: [{ name: 'DevBlog' }],
-    creator: 'DevBlog',
+    authors: [{ name: 'Dev-eloper' }],
+    creator: 'Dev-eloper',
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001'),
     alternates: {
       canonical: '/',
@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       url: '/',
       title: t('title'),
       description: t('description'),
-      siteName: 'DevBlog',
+      siteName: 'Dev-eloper',
       images: [
         {
           url: '/og-image.jpg',

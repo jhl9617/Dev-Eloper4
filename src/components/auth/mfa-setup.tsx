@@ -32,7 +32,7 @@ export function MFASetup({ onComplete }: MFASetupProps) {
     try {
       const { data, error } = await supabase.auth.mfa.enroll({ 
         factorType: 'totp',
-        friendlyName: 'DevBlog Admin App'
+        friendlyName: 'Dev-eloper Admin App'
       });
       
       if (error) throw error;

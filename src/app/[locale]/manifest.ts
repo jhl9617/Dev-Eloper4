@@ -2,9 +2,9 @@ import { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'DevBlog - Modern Blog Platform',
-    short_name: 'DevBlog',
-    description: 'A modern blog platform built with Next.js and Supabase',
+    name: 'Dev-eloper - Modern Blog Platform',
+    short_name: 'Dev-eloper',
+    description: 'Dev-eloper - A modern blog platform built with Next.js and Supabase',
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',

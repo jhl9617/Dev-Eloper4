@@ -28,10 +28,10 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   }
 
   return {
-    title: `${category.name} - DevBlog`,
+    title: `${category.name} - Dev-eloper`,
     description: `Browse all posts in the ${category.name} category.`,
     openGraph: {
-      title: `${category.name} - DevBlog`,
+      title: `${category.name} - Dev-eloper`,
       description: `Browse all posts in the ${category.name} category.`,
     },
   };

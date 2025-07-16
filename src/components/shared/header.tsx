@@ -103,7 +103,7 @@ export function Header() {
         <div className="mr-8 flex">
           <Link href="/" className="flex items-center space-x-2 group">
             <span className="font-semibold text-xl tracking-tight text-foreground transition-colors group-hover:text-primary">
-              DevBlog
+              Dev-eloper
             </span>
           </Link>
         </div>

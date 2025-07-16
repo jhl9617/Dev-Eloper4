@@ -44,7 +44,7 @@ export function HomePageClient({ posts, total, translations }: HomePageClientPro
               </span>
               <br />
               <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-                DevBlog
+                Dev-eloper
               </span>
             </motion.h1>
             <motion.p 

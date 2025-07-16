@@ -44,7 +44,7 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
     return {
       title: post.title || 'Untitled Post',
       description,
-      authors: [{ name: 'DevBlog' }],
+      authors: [{ name: 'Dev-eloper' }],
       keywords: post.tags?.map(tag => tag.name).join(', ') || '',
       openGraph: {
         title: post.title || 'Untitled Post',
@@ -52,7 +52,7 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
         type: 'article',
         publishedTime,
         modifiedTime,
-        authors: ['DevBlog'],
+        authors: ['Dev-eloper'],
         section: post.category?.name || 'General',
         tags: post.tags?.map(tag => tag.name) || [],
         images: post.cover_image_path ? [

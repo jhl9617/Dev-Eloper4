@@ -29,10 +29,10 @@ export async function generateMetadata({ params }: TagPageProps): Promise<Metada
   }
 
   return {
-    title: `#${tag.name} - DevBlog`,
+    title: `#${tag.name} - Dev-eloper`,
     description: `Browse all posts tagged with ${tag.name}.`,
     openGraph: {
-      title: `#${tag.name} - DevBlog`,
+      title: `#${tag.name} - Dev-eloper`,
       description: `Browse all posts tagged with ${tag.name}.`,
     },
   };
