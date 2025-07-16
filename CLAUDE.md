@@ -169,3 +169,23 @@ Use Gemini as a secondary AI assistant for:
 ```
 
 **Always check `docs/progress-log.md` before starting work to understand current project state and context.**
+
+## Database Schema Management
+
+**CRITICAL**: All database schema changes must be properly managed
+
+### Database Change Protocol
+1. **Update Schema File**: Always update `docs/database-complete.sql` with new schema changes
+2. **Provide SQL Output**: After making changes, provide the SQL commands in a code block for direct execution
+3. **Clear Documentation**: Document what tables/columns/indexes were added or modified
+
+### SQL Output Format
+When making database changes, always provide:
+```sql
+-- Copy and paste this into Supabase SQL Editor
+-- [Description of changes]
+
+[SQL commands here]
+```
+
+**Always update `@docs/database-complete.sql` first, then provide executable SQL output for the user.**

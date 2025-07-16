@@ -127,6 +127,40 @@ CREATE TABLE IF NOT EXISTS login_attempts (
     user_agent  TEXT
 );
 
+-- Comments 테이블
+CREATE TABLE IF NOT EXISTS comments (
+    id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    created_at  TIMESTAMPTZ DEFAULT now(),
+    updated_at  TIMESTAMPTZ DEFAULT now(),
+    deleted_at  TIMESTAMPTZ,
+    post_id     UUID NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+    content     TEXT NOT NULL,
+    author_name VARCHAR(30) NOT NULL,
+    ip_address  INET NOT NULL,
+    
+    CONSTRAINT comments_content_length CHECK (length(content) BETWEEN 5 AND 500),
+    CONSTRAINT comments_name_length CHECK (length(author_name) BETWEEN 2 AND 30)
+);
+
+-- Comment Rate Limits 테이블
+CREATE TABLE IF NOT EXISTS comment_rate_limits (
+    ip_address      INET PRIMARY KEY,
+    comment_count   INTEGER DEFAULT 0,
+    last_comment_at TIMESTAMPTZ DEFAULT now(),
+    reset_time      TIMESTAMPTZ DEFAULT (now() + INTERVAL '1 hour')
+);
+
+-- Session Comments 테이블 (사용자 댓글 삭제 권한 관리)
+CREATE TABLE IF NOT EXISTS session_comments (
+    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    created_at      TIMESTAMPTZ DEFAULT now(),
+    session_id      VARCHAR(128) NOT NULL,
+    comment_id      UUID NOT NULL REFERENCES comments(id) ON DELETE CASCADE,
+    expires_at      TIMESTAMPTZ NOT NULL,
+    
+    UNIQUE(session_id, comment_id)
+);
+
 /* ============================================================================
    5. Indexes
    ============================================================================ */
@@ -158,6 +192,27 @@ CREATE INDEX IF NOT EXISTS idx_login_attempts_email
 CREATE INDEX IF NOT EXISTS idx_login_attempts_created_at
   ON login_attempts(created_at DESC);
 
+-- Comments 인덱스
+CREATE INDEX IF NOT EXISTS idx_comments_post_id
+  ON comments(post_id);
+
+CREATE INDEX IF NOT EXISTS idx_comments_created_at
+  ON comments(created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_comments_ip_address
+  ON comments(ip_address);
+
+-- Comment rate limits 인덱스
+CREATE INDEX IF NOT EXISTS idx_comment_rate_limits_reset_time
+  ON comment_rate_limits(reset_time);
+
+-- Session comments 인덱스
+CREATE INDEX IF NOT EXISTS idx_session_comments_session_id
+  ON session_comments(session_id);
+
+CREATE INDEX IF NOT EXISTS idx_session_comments_expires_at
+  ON session_comments(expires_at);
+
 /* ============================================================================
    6. Triggers
    ============================================================================ */
@@ -179,6 +234,11 @@ CREATE TRIGGER trg_posts_updated_at
 CREATE TRIGGER trg_posts_tsv
   BEFORE INSERT OR UPDATE ON posts
   FOR EACH ROW EXECUTE FUNCTION set_posts_search_vector();
+
+-- Comments updated_at 트리거
+CREATE TRIGGER trg_comments_updated_at
+  BEFORE UPDATE ON comments
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 /* ============================================================================
    7. Security Functions
@@ -244,6 +304,8 @@ ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE post_tags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE security_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE login_attempts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE comments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE comment_rate_limits ENABLE ROW LEVEL SECURITY;
 
 /* ============================================================================
    9. RLS Policies
@@ -300,6 +362,32 @@ CREATE POLICY login_attempts_admin_only
   ON login_attempts FOR ALL
   USING (is_admin());
 
+-- Comments 정책
+CREATE POLICY comments_public_read
+  ON comments FOR SELECT
+  USING (deleted_at IS NULL);
+
+CREATE POLICY comments_public_insert
+  ON comments FOR INSERT
+  WITH CHECK (true);
+
+CREATE POLICY comments_admin_full
+  ON comments FOR ALL
+  USING (is_admin());
+
+-- Comment rate limits 정책
+CREATE POLICY comment_rate_limits_public_read
+  ON comment_rate_limits FOR SELECT
+  USING (true);
+
+CREATE POLICY comment_rate_limits_public_upsert
+  ON comment_rate_limits FOR INSERT
+  WITH CHECK (true);
+
+CREATE POLICY comment_rate_limits_public_update
+  ON comment_rate_limits FOR UPDATE
+  USING (true);
+
 /* ============================================================================
    10. Function Permissions
    ============================================================================ */
@@ -345,13 +433,15 @@ ON CONFLICT (slug) DO NOTHING;
 DO $$
 BEGIN
   RAISE NOTICE '✅ Database setup completed successfully!';
-  RAISE NOTICE '📋 Created tables: admins, categories, tags, posts, post_tags, security_logs, login_attempts';
+  RAISE NOTICE '📋 Created tables: admins, categories, tags, posts, post_tags, security_logs, login_attempts, comments, comment_rate_limits';
   RAISE NOTICE '🔧 Functions: is_admin(), log_security_event(), log_login_attempt()';
   RAISE NOTICE '🛡️ RLS policies applied to all tables';
   RAISE NOTICE '📊 Initial data inserted for categories and tags';
+  RAISE NOTICE '💬 Comments system ready with rate limiting';
   RAISE NOTICE '';
   RAISE NOTICE '🔑 Next steps:';
   RAISE NOTICE '   1. Add your admin user: INSERT INTO admins (user_id) VALUES (''your-uuid-here'');';
   RAISE NOTICE '   2. Test admin function: SELECT is_admin();';
   RAISE NOTICE '   3. Configure storage policies if needed';
+  RAISE NOTICE '   4. Test comments system with rate limiting';
 END $$;

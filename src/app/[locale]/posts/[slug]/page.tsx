@@ -4,6 +4,7 @@ import { getPostBySlug } from '@/lib/blog-server';
 import { PostHeader } from '@/components/blog/post-header';
 import { PostContent } from '@/components/blog/post-content';
 import { PostFooter } from '@/components/blog/post-footer';
+import { CommentSection } from '@/components/blog/comment-section';
 import { JsonLd } from '@/components/seo/json-ld';
 import type { Metadata } from 'next';
 
@@ -99,6 +100,11 @@ export default async function PostPage({ params }: PostPageProps) {
             <PostHeader post={post} />
             <PostContent post={post} />
             <PostFooter post={post} />
+            
+            {/* Comments Section */}
+            <div className="mt-16">
+              <CommentSection postId={post.id} />
+            </div>
           </div>
         </article>
       </>
