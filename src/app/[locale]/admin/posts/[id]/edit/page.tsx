@@ -293,7 +293,7 @@ export default function EditPostPage() {
       <div className="container py-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
-          <p className="text-muted-foreground">You don't have permission to access this page.</p>
+          <p className="text-muted-foreground">You don&apos;t have permission to access this page.</p>
         </div>
       </div>
     );
@@ -317,7 +317,7 @@ export default function EditPostPage() {
       <div className="container py-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Post Not Found</h1>
-          <p className="text-muted-foreground mb-4">The post you're looking for doesn't exist.</p>
+          <p className="text-muted-foreground mb-4">The post you&apos;re looking for doesn&apos;t exist.</p>
           <Button asChild>
             <Link href="/admin/posts">
               <ArrowLeft className="mr-2 h-4 w-4" />

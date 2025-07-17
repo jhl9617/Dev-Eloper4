@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -65,7 +65,7 @@ export function CommentSection({ postId }: CommentSectionProps) {
   const { toast } = useToast();
 
   // Initialize comment session on component mount
-  const initializeCommentSession = async () => {
+  const initializeCommentSession = useCallback(async () => {
     try {
       const response = await fetch('/api/comments/session', {
         method: 'POST',
@@ -78,9 +78,9 @@ export function CommentSection({ postId }: CommentSectionProps) {
       console.error('Failed to initialize comment session:', error);
       // This is not a fatal error, user can still view comments
     }
-  };
+  }, []);
 
-  const fetchComments = async (page: number = 1) => {
+  const fetchComments = useCallback(async (page: number = 1) => {
     setLoading(true);
     setError(null);
     
@@ -100,7 +100,7 @@ export function CommentSection({ postId }: CommentSectionProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [postId, pagination.limit]);
 
   const handleDeleteComment = async (commentId: string) => {
     if (!confirm('Are you sure you want to delete this comment?')) {
@@ -163,7 +163,7 @@ export function CommentSection({ postId }: CommentSectionProps) {
     // Initialize session and fetch comments in parallel
     initializeCommentSession();
     fetchComments();
-  }, [postId]);
+  }, [postId, initializeCommentSession, fetchComments]);
 
   const containerVariants = {
     hidden: { opacity: 0 },

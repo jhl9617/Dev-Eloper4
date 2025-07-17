@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createClient } from '@/lib/supabase/client';
@@ -99,9 +99,9 @@ export default function CategoriesPage() {
   // Load data
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     
     try {
@@ -155,7 +155,7 @@ export default function CategoriesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast, supabase]);
 
   const handleCategorySubmit = async (data: CategoryFormData) => {
     setSubmitting(true);

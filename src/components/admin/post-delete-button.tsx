@@ -67,7 +67,7 @@ export function PostDeleteButton({ postId, postTitle }: PostDeleteButtonProps) {
         <DialogHeader>
           <DialogTitle>Delete Post</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete "{postTitle}"? This action cannot be undone.
+            Are you sure you want to delete &quot;{postTitle}&quot;? This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
