@@ -93,7 +93,7 @@ export function CommentSection({ postId }: CommentSectionProps) {
         setUserDeletableComments(data.userDeletableComments);
         setPagination(data.pagination);
       } else {
-        setError(data.error || 'Failed to load comments');
+        setError('Failed to load comments');
       }
     } catch (err) {
       setError('Failed to load comments');

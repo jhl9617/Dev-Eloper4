@@ -19,12 +19,6 @@ export default function AdminDashboard() {
   const { user, isAdmin, loading } = useAuth();
   const supabase = createClient();
 
-  useEffect(() => {
-    if (user && isAdmin) {
-      loadStats();
-    }
-  }, [user, isAdmin, loadStats]);
-
   const loadStats = useCallback(async () => {
     try {
       // Get some basic stats
@@ -56,6 +50,12 @@ export default function AdminDashboard() {
       setStats(prev => ({ ...prev, loading: false }));
     }
   }, []);
+
+  useEffect(() => {
+    if (user && isAdmin) {
+      loadStats();
+    }
+  }, [user, isAdmin, loadStats]);
 
   if (loading) {
     return (

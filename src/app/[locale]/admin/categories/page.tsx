@@ -96,11 +96,6 @@ export default function CategoriesPage() {
     }
   }, [tagName, tagForm]);
 
-  // Load data
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
-
   const loadData = useCallback(async () => {
     setLoading(true);
     
@@ -156,6 +151,11 @@ export default function CategoriesPage() {
       setLoading(false);
     }
   }, [toast, supabase]);
+
+  // Load data
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleCategorySubmit = async (data: CategoryFormData) => {
     setSubmitting(true);
