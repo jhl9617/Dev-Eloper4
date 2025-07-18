@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -15,18 +16,18 @@ import { MathCaptcha } from '@/components/blog/math-captcha';
 import { MessageCircle, Send, AlertCircle, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-const commentSchema = z.object({
+const createCommentSchema = (t: any) => z.object({
   authorName: z.string()
-    .min(2, 'Name must be at least 2 characters')
-    .max(30, 'Name must be no more than 30 characters')
-    .regex(/^[a-zA-Z0-9가-힣\s]+$/, 'Name can only contain letters, numbers, and spaces'),
+    .min(2, t('nameMinLength'))
+    .max(30, t('nameMaxLength'))
+    .regex(/^[a-zA-Z0-9가-힣\s]+$/, t('nameInvalidChars')),
   content: z.string()
-    .min(5, 'Comment must be at least 5 characters')
-    .max(500, 'Comment must be no more than 500 characters')
+    .min(5, t('contentMinLength'))
+    .max(500, t('contentMaxLength'))
     .trim(),
 });
 
-type CommentFormData = z.infer<typeof commentSchema>;
+type CommentFormData = z.infer<ReturnType<typeof createCommentSchema>>;
 
 interface CommentFormProps {
   postId: string;
@@ -41,7 +42,11 @@ export function CommentForm({ postId, onCommentAdded }: CommentFormProps) {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const { toast } = useToast();
+  const t = useTranslations('comments');
+  const tCommon = useTranslations('common');
 
+  const commentSchema = createCommentSchema(t);
+  
   const {
     register,
     handleSubmit,
@@ -85,8 +90,8 @@ export function CommentForm({ postId, onCommentAdded }: CommentFormProps) {
   const handleCaptchaSuccess = () => {
     setShowCaptcha(false);
     toast({
-      title: 'Verification successful!',
-      description: 'You can now submit your comment.',
+      title: t('verificationSuccess'),
+      description: t('canSubmitComment'),
     });
   };
 
@@ -131,11 +136,11 @@ export function CommentForm({ postId, onCommentAdded }: CommentFormProps) {
         onCommentAdded?.(result.comment);
         
         toast({
-          title: 'Comment posted!',
-          description: 'Your comment has been successfully posted.',
+          title: t('commentPosted'),
+          description: t('commentPostedSuccess'),
         });
       } else {
-        setSubmitError(result.error || 'Failed to post comment');
+        setSubmitError(result.error || t('postCommentFailed'));
         
         // Reset CAPTCHA if it's a CAPTCHA-related error
         if (result.error?.includes('CAPTCHA')) {
@@ -146,7 +151,7 @@ export function CommentForm({ postId, onCommentAdded }: CommentFormProps) {
       }
     } catch (error) {
       console.error('Error posting comment:', error);
-      setSubmitError('Failed to post comment. Please try again.');
+      setSubmitError(t('postCommentError'));
     } finally {
       setIsSubmitting(false);
     }
@@ -157,18 +162,18 @@ export function CommentForm({ postId, onCommentAdded }: CommentFormProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <MessageCircle className="w-5 h-5" />
-          Leave a Comment
+          {t('leaveComment')}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Author Name */}
           <div className="space-y-2">
-            <Label htmlFor="authorName">Name *</Label>
+            <Label htmlFor="authorName">{t('name')} *</Label>
             <Input
               id="authorName"
               {...register('authorName')}
-              placeholder="Your name"
+              placeholder={t('namePlaceholder')}
               className={errors.authorName ? 'border-red-500' : ''}
             />
             {errors.authorName && (
@@ -178,11 +183,11 @@ export function CommentForm({ postId, onCommentAdded }: CommentFormProps) {
 
           {/* Comment Content */}
           <div className="space-y-2">
-            <Label htmlFor="content">Comment *</Label>
+            <Label htmlFor="content">{t('comment')} *</Label>
             <Textarea
               id="content"
               {...register('content')}
-              placeholder="Share your thoughts..."
+              placeholder={t('commentPlaceholder')}
               rows={4}
               className={errors.content ? 'border-red-500' : ''}
             />
@@ -213,7 +218,7 @@ export function CommentForm({ postId, onCommentAdded }: CommentFormProps) {
             <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
               <CheckCircle className="h-4 w-4 text-green-600" />
               <AlertDescription className="text-green-800 dark:text-green-200">
-                Your comment has been posted successfully!
+                {t('commentPostedSuccess')}
               </AlertDescription>
             </Alert>
           )}
@@ -235,12 +240,12 @@ export function CommentForm({ postId, onCommentAdded }: CommentFormProps) {
             {isSubmitting ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Posting...
+                {t('posting')}
               </>
             ) : (
               <>
                 <Send className="w-4 h-4 mr-2" />
-                Post Comment
+                {t('postComment')}
               </>
             )}
           </Button>

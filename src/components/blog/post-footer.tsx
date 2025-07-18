@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { useTranslations } from 'next-intl';
 import { ArrowLeft, Share2 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { useAuth } from '@/hooks/use-auth';
@@ -14,6 +15,8 @@ interface PostFooterProps {
 
 export function PostFooter({ post }: PostFooterProps) {
   const { isAdmin } = useAuth();
+  const t = useTranslations('blog');
+  const tCommon = useTranslations('common');
   
   const handleShare = async () => {
     if (navigator.share) {
@@ -43,7 +46,7 @@ export function PostFooter({ post }: PostFooterProps) {
         <Button variant="outline" asChild>
           <Link href="/posts">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Posts
+            {t('backToPosts')}
           </Link>
         </Button>
         
@@ -51,7 +54,7 @@ export function PostFooter({ post }: PostFooterProps) {
           {isAdmin && <AdminActions post={post} />}
           <Button variant="outline" onClick={handleShare}>
             <Share2 className="mr-2 h-4 w-4" />
-            Share
+            {tCommon('share')}
           </Button>
         </div>
       </div>
@@ -59,7 +62,7 @@ export function PostFooter({ post }: PostFooterProps) {
       {/* Category and Tags Info */}
       <div className="text-center text-sm text-muted-foreground">
         <p>
-          Filed under{' '}
+          {t('filedUnder')}{' '}
           {post.category && (
             <Link 
               href={`/categories/${post.category.slug}`}
@@ -70,7 +73,7 @@ export function PostFooter({ post }: PostFooterProps) {
           )}
           {post.tags && post.tags.length > 0 && (
             <>
-              {' '}with tags{' '}
+              {' '}{t('withTags')}{' '}
               {post.tags.map((tag, index) => (
                 <span key={tag.id}>
                   <Link 

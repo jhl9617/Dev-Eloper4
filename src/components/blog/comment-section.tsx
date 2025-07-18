@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -63,6 +64,8 @@ export function CommentSection({ postId }: CommentSectionProps) {
   
   const { isAdmin } = useAuth();
   const { toast } = useToast();
+  const t = useTranslations('comments');
+  const tCommon = useTranslations('common');
 
   // Initialize comment session on component mount
   const initializeCommentSession = useCallback(async () => {
@@ -93,17 +96,17 @@ export function CommentSection({ postId }: CommentSectionProps) {
         setUserDeletableComments(data.userDeletableComments);
         setPagination(data.pagination);
       } else {
-        setError('Failed to load comments');
+        setError(t('loadCommentsFailed'));
       }
     } catch (err) {
-      setError('Failed to load comments');
+      setError(t('loadCommentsFailed'));
     } finally {
       setLoading(false);
     }
   }, [postId, pagination.limit]);
 
   const handleDeleteComment = async (commentId: string) => {
-    if (!confirm('Are you sure you want to delete this comment?')) {
+    if (!confirm(t('confirmDeleteComment'))) {
       return;
     }
 
@@ -122,21 +125,21 @@ export function CommentSection({ postId }: CommentSectionProps) {
         }));
         
         toast({
-          title: 'Comment deleted',
-          description: 'The comment has been successfully deleted.',
+          title: t('commentDeleted'),
+          description: t('commentDeletedSuccess'),
         });
       } else {
         const data = await response.json();
         toast({
-          title: 'Delete failed',
-          description: data.error || 'Failed to delete comment',
+          title: t('deleteFailed'),
+          description: data.error || t('deleteCommentFailed'),
           variant: 'destructive',
         });
       }
     } catch (err) {
       toast({
-        title: 'Delete failed',
-        description: 'Failed to delete comment',
+        title: t('deleteFailed'),
+        description: t('deleteCommentFailed'),
         variant: 'destructive',
       });
     } finally {
@@ -192,10 +195,10 @@ export function CommentSection({ postId }: CommentSectionProps) {
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold flex items-center gap-2">
           <MessageCircle className="w-6 h-6" />
-          Comments ({pagination.total})
+          {t('comments')} ({pagination.total})
           {sessionInitialized && (
             <span className="text-xs text-green-600 dark:text-green-400 ml-2">
-              Session ready
+              {t('sessionReady')}
             </span>
           )}
         </h2>
@@ -207,7 +210,7 @@ export function CommentSection({ postId }: CommentSectionProps) {
           disabled={loading}
         >
           <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-          Refresh
+          {tCommon('refresh')}
         </Button>
       </div>
 
@@ -230,7 +233,7 @@ export function CommentSection({ postId }: CommentSectionProps) {
         ) : comments.length === 0 ? (
           <div className="text-center py-8">
             <MessageCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">No comments yet. Be the first to comment!</p>
+            <p className="text-muted-foreground">{t('noComments')}</p>
           </div>
         ) : (
           <motion.div
@@ -272,7 +275,7 @@ export function CommentSection({ postId }: CommentSectionProps) {
                             {!isAdmin && userDeletableComments.includes(comment.id) && (
                               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                 <Clock className="w-3 h-3" />
-                                <span>You can delete this comment (30 min limit)</span>
+                                <span>{t('canDeleteComment')}</span>
                               </div>
                             )}
                             <Button
@@ -281,7 +284,7 @@ export function CommentSection({ postId }: CommentSectionProps) {
                               onClick={() => handleDeleteComment(comment.id)}
                               disabled={deleting === comment.id}
                               className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                              title={isAdmin ? "Delete comment (admin)" : "Delete your comment"}
+                              title={isAdmin ? t('deleteCommentAdmin') : t('deleteYourComment')}
                             >
                               {deleting === comment.id ? (
                                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-500"></div>
@@ -311,7 +314,7 @@ export function CommentSection({ postId }: CommentSectionProps) {
             disabled={pagination.page === 1}
           >
             <ChevronLeft className="w-4 h-4 mr-1" />
-            Previous
+            {tCommon('previous')}
           </Button>
           
           <div className="flex items-center gap-2">
@@ -334,7 +337,7 @@ export function CommentSection({ postId }: CommentSectionProps) {
             onClick={() => handlePageChange(pagination.page + 1)}
             disabled={pagination.page === pagination.totalPages}
           >
-            Next
+            {tCommon('next')}
             <ChevronRight className="w-4 h-4 ml-1" />
           </Button>
         </div>

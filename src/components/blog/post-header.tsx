@@ -2,6 +2,7 @@
 
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
+import { useTranslations } from 'next-intl';
 import { CalendarDays, Clock, User } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import type { PostWithRelations } from '@/lib/blog';
@@ -12,6 +13,8 @@ interface PostHeaderProps {
 }
 
 export function PostHeader({ post }: PostHeaderProps) {
+  const t = useTranslations('blog');
+  
   const publishedDate = post.published_at 
     ? new Date(post.published_at) 
     : new Date(post.created_at);
@@ -68,7 +71,7 @@ export function PostHeader({ post }: PostHeaderProps) {
         </div>
         <div className="flex items-center space-x-1">
           <Clock className="h-4 w-4" />
-          <span>{readingTime} min read</span>
+          <span>{t('readingTime', { minutes: readingTime })}</span>
         </div>
       </div>
 

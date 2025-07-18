@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { format } from 'date-fns';
+import { useTranslations } from 'next-intl';
 import { memo, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
@@ -21,6 +22,8 @@ interface PostCardProps {
 }
 
 export const PostCard = memo(function PostCard({ post, priority = false, index = 0 }: PostCardProps) {
+  const t = useTranslations('blog');
+  
   const { publishedDate, readingTime, thumbnailUrl } = useMemo(() => {
     const publishedDate = post.published_at 
       ? new Date(post.published_at) 
@@ -141,7 +144,7 @@ export const PostCard = memo(function PostCard({ post, priority = false, index =
             </div>
             <div className="flex items-center space-x-2">
               <Clock className="h-4 w-4" />
-              <span className="font-medium">{readingTime} min read</span>
+              <span className="font-medium">{t('readingTime', { minutes: readingTime })}</span>
             </div>
           </div>
         </div>
