@@ -52,8 +52,28 @@ export async function updateSession(request: NextRequest, response?: NextRespons
       return NextResponse.redirect(url)
     }
 
-    // Check if user is admin (temporary email-based check)
-    const isAdmin = user.email === 'admin@devblog.com'
+    // Check if user is admin by querying admins table
+    console.log('🚦 Middleware - checking admin for user ID:', user.id);
+    let isAdmin = false;
+    
+    try {
+      const { data: adminData, error } = await supabase
+        .from('admins')
+        .select('user_id')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (!error && adminData) {
+        isAdmin = true;
+        console.log('🚦 Middleware - user found in admins table');
+      } else {
+        console.log('🚦 Middleware - user not found in admins table:', error?.message);
+        isAdmin = false;
+      }
+    } catch (error) {
+      console.error('🚦 Middleware - error checking admin table:', error);
+      isAdmin = false;
+    }
 
     if (!isAdmin) {
       // User exists but is not admin

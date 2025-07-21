@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { createHmac } from 'crypto';
 
 interface MathProblem {
   question: string;
@@ -48,10 +49,25 @@ export async function GET(request: NextRequest) {
     // Create session ID
     const sessionId = crypto.randomUUID();
     
-    // Store answer in cookie (encrypted in production)
+    // Get CAPTCHA secret from environment variable
+    const captchaSecret = process.env.CAPTCHA_SECRET;
+    
+    if (!captchaSecret) {
+      throw new Error(
+        'CAPTCHA_SECRET environment variable is required for security. ' +
+        'Please set a strong random string in your .env.local file.'
+      );
+    }
+    
+    // Hash the answer for secure storage
+    const answerHash = createHmac('sha256', captchaSecret)
+      .update(String(problem.answer))
+      .digest('hex');
+    
+    // Store hashed answer in cookie
     const cookieStore = await cookies();
     cookieStore.set(`captcha_${sessionId}`, JSON.stringify({
-      answer: problem.answer,
+      answerHash,
       expires: Date.now() + 10 * 60 * 1000, // 10 minutes
     }), {
       httpOnly: true,
@@ -95,7 +111,7 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const { answer, expires } = JSON.parse(storedData.value);
+    const { answerHash, expires } = JSON.parse(storedData.value);
     
     // Check if session expired
     if (Date.now() > expires) {
@@ -107,13 +123,27 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Verify answer
-    const isCorrect = parseInt(userAnswer) === answer;
+    // Get CAPTCHA secret from environment variable
+    const captchaSecret = process.env.CAPTCHA_SECRET;
+    
+    if (!captchaSecret) {
+      throw new Error(
+        'CAPTCHA_SECRET environment variable is required for security. ' +
+        'Please set a strong random string in your .env.local file.'
+      );
+    }
+    
+    // Hash the user's answer and compare with stored hash
+    const userAnswerHash = createHmac('sha256', captchaSecret)
+      .update(String(parseInt(userAnswer)))
+      .digest('hex');
+    
+    const isCorrect = userAnswerHash === answerHash;
     
     if (isCorrect) {
       // Mark as verified but keep cookie for comment submission
       cookieStore.set(`captcha_${sessionId}`, JSON.stringify({
-        answer: answer,
+        answerHash: answerHash,
         expires: expires,
         verified: true, // Mark as verified
       }), {

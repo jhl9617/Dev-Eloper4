@@ -24,8 +24,17 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 async function createAdminAccount() {
   console.log("🔑 데모 관리자 계정 생성 중...");
 
-  const testEmail = "admin@devblog.com";
-  const testPassword = "DevBlog123!";
+  // Get admin credentials from environment variables
+  const testEmail = process.env.ADMIN_EMAIL;
+  const testPassword = process.env.ADMIN_INITIAL_PASSWORD;
+  
+  if (!testEmail || !testPassword) {
+    console.error("❌ 필수 환경 변수가 설정되지 않았습니다:");
+    console.error("- ADMIN_EMAIL: 관리자 이메일 주소");
+    console.error("- ADMIN_INITIAL_PASSWORD: 관리자 초기 비밀번호");
+    console.error("보안을 위해 .env.local 파일에 이 변수들을 설정하세요.");
+    process.exit(1);
+  }
 
   try {
     // 1. 사용자 생성
@@ -148,7 +157,7 @@ async function createAdminAccount() {
     console.log("\n🎉 데모 계정 설정 완료!");
     console.log("=".repeat(50));
     console.log("📧 이메일:", testEmail);
-    console.log("🔐 비밀번호:", testPassword);
+    console.log("🔐 비밀번호: [환경 변수에서 설정됨]");
     console.log("🔗 로그인 URL: http://localhost:3001/auth/login");
     console.log("🏠 관리자 대시보드: http://localhost:3001/admin");
     console.log("=".repeat(50));

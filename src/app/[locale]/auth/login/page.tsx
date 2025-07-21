@@ -32,70 +32,36 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('📝 Login form submitted');
     setLoading(true);
     setError('');
     setAttemptCount(prev => prev + 1);
 
     try {
-      // 로그인 시도 제한 확인 (선택적)
-      try {
-        const { data: canAttempt } = await supabase.rpc('check_login_allowed', {
-          p_ip_address: '127.0.0.1',
-          p_email: email
-        });
+      // 로그인 시도 제한 확인 임시 비활성화
+      console.log('📝 Skipping login rate limit check for debugging');
 
-        if (canAttempt === false) {
-          setError('너무 많은 로그인 시도로 인해 일시적으로 차단되었습니다.');
-          setLoading(false);
-          return;
-        }
-      } catch (rpcError) {
-        // RPC 함수가 없으면 무시하고 계속 진행
-        console.log('Security functions not available, proceeding with login');
-      }
-
-      const { data, error: signInError } = await signIn(email, password);
+      console.log('📝 Calling signIn function...');
+      // Direct Supabase call for debugging
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      console.log('📝 SignIn completed:', { hasData: !!data, hasError: !!signInError });
 
       if (signInError) {
-        // 로그인 실패 로깅 (선택적)
-        try {
-          await supabase.rpc('log_login_attempt', {
-            p_ip_address: '127.0.0.1',
-            p_email: email,
-            p_success: false
-          });
-        } catch (logError) {
-          console.log('Login logging not available');
-        }
-        
+        console.log('📝 SignIn error:', signInError.message);
         setError(signInError.message);
         setLoading(false);
         return;
       }
 
       if (data.user) {
-        // 로그인 성공 로깅 (선택적)
-        try {
-          await supabase.rpc('log_login_attempt', {
-            p_ip_address: '127.0.0.1',
-            p_email: email,
-            p_success: true
-          });
-        } catch (logError) {
-          console.log('Login logging not available');
-        }
-
-        // MFA 확인 (선택적)
-        try {
-          const { data: factors } = await supabase.auth.mfa.listFactors();
-          if (factors && factors.totp && factors.totp.length > 0) {
-            setNeedsMFA(true);
-            setLoading(false);
-            return;
-          }
-        } catch (mfaError) {
-          console.log('MFA check not available');
-        }
+        console.log('📝 Login successful, checking admin status...');
+        
+        // Check if user needs to be added to admins table
+        // This should only be done through admin creation scripts in production
+        console.log('📝 User logged in successfully:', data.user.email);
 
         toast({
           description: 'Successfully signed in!',

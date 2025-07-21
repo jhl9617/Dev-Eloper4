@@ -29,7 +29,7 @@ export function HtmlContent({ content, className = '' }: HtmlContentProps) {
         ],
         ALLOWED_ATTR: [
           'href', 'target', 'rel', 'title', 'alt', 'src', 'width', 'height',
-          'class', 'style', 'colspan', 'rowspan', 'align'
+          'class', 'colspan', 'rowspan', 'align'
         ],
         ALLOW_DATA_ATTR: false,
         RETURN_DOM_FRAGMENT: false,

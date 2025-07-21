@@ -25,7 +25,13 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 async function fixAdminPermissions() {
   console.log("🔧 관리자 권한 복구 중...");
   
-  const testEmail = "admin@devblog.com";
+  const testEmail = process.env.ADMIN_EMAIL;
+  
+  if (!testEmail) {
+    console.error("❌ ADMIN_EMAIL 환경 변수가 설정되지 않았습니다.");
+    console.error("관리자 이메일을 .env.local 파일에 설정하세요.");
+    process.exit(1);
+  }
   
   try {
     // 1. 사용자 정보 조회
@@ -40,8 +46,8 @@ async function fixAdminPermissions() {
     const adminUser = users.users.find(user => user.email === testEmail);
     
     if (!adminUser) {
-      console.error("❌ admin@devblog.com 계정을 찾을 수 없습니다.");
-      console.log("📝 먼저 scripts/create-admin-demo.js를 실행하세요.");
+      console.error(`❌ ${testEmail} 계정을 찾을 수 없습니다.`);
+      console.log("📝 먼저 tests/scripts/create-admin-demo.js를 실행하세요.");
       return;
     }
     
@@ -115,7 +121,7 @@ async function fixAdminPermissions() {
     console.log("\n🎉 관리자 권한 복구 완료!");
     console.log("=".repeat(50));
     console.log("📧 이메일:", testEmail);
-    console.log("🔐 비밀번호: DevBlog123!");
+    console.log("🔐 비밀번호: [환경 변수에서 설정]");
     console.log("🔗 로그인 URL: http://localhost:3001/auth/login");
     console.log("🏠 관리자 대시보드: http://localhost:3001/admin");
     console.log("=".repeat(50));

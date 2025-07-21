@@ -6,16 +6,17 @@ import {
   getUserDeletableComments,
   cleanupExpiredSessions 
 } from '@/lib/session';
+import { hashIpAddress } from '@/lib/ip-hash';
 
 // Rate limiting helper
-async function checkRateLimit(ip: string, supabase: any) {
+async function checkRateLimit(hashedIp: string, supabase: any) {
   const now = new Date();
   
   // Get or create rate limit record
   const { data: rateLimitData, error: rateLimitError } = await supabase
     .from('comment_rate_limits')
     .select('*')
-    .eq('ip_address', ip)
+    .eq('ip_address', hashedIp)
     .single();
   
   if (rateLimitError && rateLimitError.code !== 'PGRST116') {
@@ -27,7 +28,7 @@ async function checkRateLimit(ip: string, supabase: any) {
     await supabase
       .from('comment_rate_limits')
       .insert({
-        ip_address: ip,
+        ip_address: hashedIp,
         comment_count: 1,
         last_comment_at: now.toISOString(),
         reset_time: new Date(now.getTime() + 60 * 60 * 1000).toISOString(), // 1 hour from now
@@ -45,7 +46,7 @@ async function checkRateLimit(ip: string, supabase: any) {
         last_comment_at: now.toISOString(),
         reset_time: new Date(now.getTime() + 60 * 60 * 1000).toISOString(),
       })
-      .eq('ip_address', ip);
+      .eq('ip_address', hashedIp);
     return true;
   }
   
@@ -209,11 +210,12 @@ export async function POST(request: NextRequest) {
     const ip = request.headers.get('x-forwarded-for') || 
                request.headers.get('x-real-ip') || 
                '127.0.0.1';
+    const hashedIp = hashIpAddress(ip);
     
     const supabase = await createClient();
     
     // Check rate limit
-    const canPost = await checkRateLimit(ip, supabase);
+    const canPost = await checkRateLimit(hashedIp, supabase);
     if (!canPost) {
       return NextResponse.json(
         { error: 'Rate limit exceeded. Please wait before posting again.' },
@@ -278,7 +280,7 @@ export async function POST(request: NextRequest) {
         post_id: postId,
         content: content.trim(),
         author_name: authorName.trim(),
-        ip_address: ip,
+        ip_address: hashedIp,
         parent_id: parentId || null,
       })
       .select()

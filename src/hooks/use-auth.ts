@@ -23,18 +23,37 @@ export function useAuth() {
   useEffect(() => {
     // Get initial session
     const getSession = async () => {
+      console.log('🔄 Getting initial session...');
       const { data: { session } } = await supabase.auth.getSession();
       const user = session?.user ?? null;
+      console.log('🔄 Initial session result:', { hasUser: !!user, email: user?.email });
       
       let isAdmin = false;
       if (user) {
-        // admin@devblog.com 이메일로 관리자 권한 부여 (임시)
-        isAdmin = user.email === 'admin@devblog.com';
+        // Check if user is admin by querying admins table
+        console.log('🔍 Checking admin status for user ID:', user.id);
         
-        // Debug info for admin verification (disabled to reduce console noise)
-        // console.log('Admin login:', user.email === 'admin@devblog.com' ? '✅' : '❌', user.email);
+        try {
+          const { data: adminData, error } = await supabase
+            .from('admins')
+            .select('user_id')
+            .eq('user_id', user.id)
+            .single();
+          
+          if (!error && adminData) {
+            isAdmin = true;
+            console.log('🔍 User found in admins table');
+          } else {
+            console.log('🔍 User not found in admins table:', error?.message);
+            isAdmin = false;
+          }
+        } catch (error) {
+          console.error('🔍 Error checking admin table:', error);
+          isAdmin = false;
+        }
       }
 
+      console.log('🔄 Setting auth state:', { hasUser: !!user, isAdmin });
       setAuthState({ user, isAdmin, loading: false });
     };
 
@@ -47,11 +66,27 @@ export function useAuth() {
         
         let isAdmin = false;
         if (user) {
-          // admin@devblog.com 이메일로 관리자 권한 부여 (임시)
-          isAdmin = user.email === 'admin@devblog.com';
+          // Check if user is admin by querying admins table
+          console.log('🔍 Auth change - checking admin status for user ID:', user.id);
           
-          // Debug info for admin verification (disabled to reduce console noise)
-          // console.log('Auth change:', event, user.email === 'admin@devblog.com' ? '✅' : '❌', user.email);
+          try {
+            const { data: adminData, error } = await supabase
+              .from('admins')
+              .select('user_id')
+              .eq('user_id', user.id)
+              .single();
+            
+            if (!error && adminData) {
+              isAdmin = true;
+              console.log('🔍 Auth change - user found in admins table');
+            } else {
+              console.log('🔍 Auth change - user not found in admins table:', error?.message);
+              isAdmin = false;
+            }
+          } catch (error) {
+            console.error('🔍 Auth change - error checking admin table:', error);
+            isAdmin = false;
+          }
         }
 
         setAuthState({ user, isAdmin, loading: false });
@@ -66,11 +101,25 @@ export function useAuth() {
   }, [router, supabase]);
 
   const signIn = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { data, error };
+    console.log('🔐 Starting signIn process for:', email);
+    
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      console.log('🔐 Supabase signIn response:', { 
+        hasUser: !!data?.user, 
+        hasSession: !!data?.session, 
+        error: error?.message 
+      });
+      
+      return { data, error };
+    } catch (error) {
+      console.error('🔐 SignIn error caught:', error);
+      return { data: null, error };
+    }
   };
 
   const signOut = async () => {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { headers } from 'next/headers';
+import { hashIpAddress, getClientIpAddress } from '@/lib/ip-hash';
 
 export async function GET(
   request: NextRequest,
@@ -61,16 +62,15 @@ export async function POST(
 
     // Get IP address
     const headersList = await headers();
-    const forwarded = headersList.get('x-forwarded-for');
-    const realIp = headersList.get('x-real-ip');
-    const ip = forwarded?.split(',')[0] || realIp || '127.0.0.1';
+    const ip = getClientIpAddress(headersList);
+    const hashedIp = hashIpAddress(ip);
 
     // Check if user already reacted to this comment
     const { data: existingReaction, error: checkError } = await supabase
       .from('comment_reactions')
       .select('*')
       .eq('comment_id', commentId)
-      .eq('ip_address', ip)
+      .eq('ip_address', hashedIp)
       .single();
 
     if (checkError && checkError.code !== 'PGRST116') {
@@ -117,7 +117,7 @@ export async function POST(
         .from('comment_reactions')
         .insert({
           comment_id: commentId,
-          ip_address: ip,
+          ip_address: hashedIp,
           reaction_type: reactionType,
         });
 
@@ -150,16 +150,15 @@ export async function DELETE(
 
     // Get IP address
     const headersList = await headers();
-    const forwarded = headersList.get('x-forwarded-for');
-    const realIp = headersList.get('x-real-ip');
-    const ip = forwarded?.split(',')[0] || realIp || '127.0.0.1';
+    const ip = getClientIpAddress(headersList);
+    const hashedIp = hashIpAddress(ip);
 
     // Delete user's reaction
     const { error } = await supabase
       .from('comment_reactions')
       .delete()
       .eq('comment_id', commentId)
-      .eq('ip_address', ip);
+      .eq('ip_address', hashedIp);
 
     if (error) {
       throw error;

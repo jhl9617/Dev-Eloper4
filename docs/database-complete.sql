@@ -338,8 +338,8 @@ $$;
    8. Row Level Security (RLS) Setup
    ============================================================================ */
 
--- Admins 테이블: RLS 비활성화 (무한 재귀 방지)
-ALTER TABLE admins DISABLE ROW LEVEL SECURITY;
+-- Admins 테이블: RLS 활성화 및 보안 정책 설정
+ALTER TABLE admins ENABLE ROW LEVEL SECURITY;
 
 -- 다른 모든 테이블에 RLS 활성화
 ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
@@ -357,6 +357,15 @@ ALTER TABLE comment_reactions ENABLE ROW LEVEL SECURITY;
 /* ============================================================================
    9. RLS Policies
    ============================================================================ */
+
+-- Admins 정책 (is_admin() 함수를 사용하여 순환 참조 방지)
+CREATE POLICY admins_admin_read
+  ON admins FOR SELECT
+  USING (is_admin());
+
+CREATE POLICY admins_admin_full
+  ON admins FOR ALL
+  USING (is_admin());
 
 -- Categories 정책
 CREATE POLICY categories_public_read
