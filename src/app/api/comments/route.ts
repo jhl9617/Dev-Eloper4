@@ -62,7 +62,7 @@ async function checkRateLimit(hashedIp: string, supabase: any) {
       comment_count: rateLimitData.comment_count + 1,
       last_comment_at: now.toISOString(),
     })
-    .eq('ip_address', ip);
+    .eq('ip_address', hashedIp);
     
   return true;
 }
