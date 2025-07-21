@@ -4,7 +4,8 @@ import { getPostBySlug } from '@/lib/blog-server';
 import { PostHeader } from '@/components/blog/post-header';
 import { PostContent } from '@/components/blog/post-content';
 import { PostFooter } from '@/components/blog/post-footer';
-import { CommentSection } from '@/components/blog/comment-section';
+import { EnhancedCommentSection } from '@/components/blog/enhanced-comment-section';
+import { ViewTracker } from '@/components/blog/view-tracker';
 import { JsonLd } from '@/components/seo/json-ld';
 import type { Metadata } from 'next';
 
@@ -95,6 +96,7 @@ export default async function PostPage({ params }: PostPageProps) {
     return (
       <>
         <JsonLd type="article" post={post} />
+        <ViewTracker postId={post.id} />
         <article className="container py-6 lg:py-10">
           <div className="mx-auto max-w-4xl">
             <PostHeader post={post} />
@@ -103,7 +105,7 @@ export default async function PostPage({ params }: PostPageProps) {
             
             {/* Comments Section */}
             <div className="mt-16">
-              <CommentSection postId={post.id} />
+              <EnhancedCommentSection postId={post.id} />
             </div>
           </div>
         </article>

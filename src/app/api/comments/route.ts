@@ -83,15 +83,16 @@ export async function GET(request: NextRequest) {
     
     const supabase = await createClient();
     
-    // Get comments with pagination
-    const { data: comments, error, count } = await supabase
+    // Get parent comments with pagination
+    const { data: parentComments, error, count } = await supabase
       .from('comments')
       .select('*', { count: 'exact' })
       .eq('post_id', postId)
       .is('deleted_at', null)
+      .is('parent_id', null)
       .order('created_at', { ascending: false })
       .range((page - 1) * limit, page * limit - 1);
-    
+
     if (error) {
       console.error('Error fetching comments:', error);
       return NextResponse.json(
@@ -99,6 +100,33 @@ export async function GET(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Get all replies for the parent comments
+    const parentIds = parentComments?.map(comment => comment.id) || [];
+    let replies = [];
+    
+    if (parentIds.length > 0) {
+      const { data: repliesData, error: repliesError } = await supabase
+        .from('comments')
+        .select('*')
+        .eq('post_id', postId)
+        .is('deleted_at', null)
+        .in('parent_id', parentIds)
+        .order('created_at', { ascending: true }); // Replies in chronological order
+      
+      if (repliesError) {
+        console.error('Error fetching replies:', repliesError);
+        replies = [];
+      } else {
+        replies = repliesData || [];
+      }
+    }
+
+    // Organize comments into hierarchy
+    const comments = (parentComments || []).map(parentComment => ({
+      ...parentComment,
+      replies: replies.filter(reply => reply.parent_id === parentComment.id)
+    }));
 
     // Get user's deletable comments
     const userDeletableComments = await getUserDeletableComments(postId);
@@ -128,7 +156,7 @@ export async function GET(request: NextRequest) {
 // POST - Create a new comment
 export async function POST(request: NextRequest) {
   try {
-    const { postId, content, authorName, captchaSessionId, captchaAnswer } = await request.json();
+    const { postId, content, authorName, captchaSessionId, captchaAnswer, parentId } = await request.json();
     
     // Validation
     if (!postId || !content || !authorName || !captchaSessionId || captchaAnswer === undefined) {
@@ -225,6 +253,24 @@ export async function POST(request: NextRequest) {
       );
     }
     
+    // If parentId is provided, verify the parent comment exists
+    if (parentId) {
+      const { data: parentComment, error: parentError } = await supabase
+        .from('comments')
+        .select('id')
+        .eq('id', parentId)
+        .eq('post_id', postId)
+        .is('deleted_at', null)
+        .single();
+      
+      if (parentError || !parentComment) {
+        return NextResponse.json(
+          { error: 'Parent comment not found' },
+          { status: 400 }
+        );
+      }
+    }
+
     // Create comment
     const { data: comment, error: commentError } = await supabase
       .from('comments')
@@ -233,6 +279,7 @@ export async function POST(request: NextRequest) {
         content: content.trim(),
         author_name: authorName.trim(),
         ip_address: ip,
+        parent_id: parentId || null,
       })
       .select()
       .single();

@@ -103,7 +103,30 @@
     "uploadImage": "Upload Image",
     "imageUploaded": "Image uploaded successfully",
     "totalArticles": "Total Articles",
-    "popularBadge": "Popular"
+    "popularBadge": "Popular",
+    "manageComments": "Manage Comments",
+    "commentsManagement": "Comments Management",
+    "recentComments": "Recent Comments",
+    "recentActivity": "Recent Activity",
+    "viewAllComments": "View All Comments",
+    "noRecentComments": "No recent comments",
+    "commentManagement": "Comment Management",
+    "monitorComments": "Monitor and moderate all user comments",
+    "totalComments": "Total Comments",
+    "thisPage": "This Page",
+    "totalPages": "Total Pages",
+    "commentsList": "Comments List",
+    "clickToViewPost": "Click on a comment to go to the post",
+    "sortBy": "Sort By",
+    "newest": "Newest",
+    "oldest": "Oldest",
+    "byPost": "By Post",
+    "deleteComment": "Delete Comment",
+    "manageAllComments": "Manage and monitor all blog comments",
+    "replyToComment": "Reply",
+    "reactions": "reactions",
+    "parentComment": "Parent Comment",
+    "replyToUser": "Reply to {author}:"
   },
   "auth": {
     "email": "Email",
@@ -240,6 +263,10 @@
     "nameMaxLength": "Name must be no more than 30 characters",
     "nameInvalidChars": "Name can only contain letters, numbers, and spaces",
     "contentMinLength": "Comment must be at least 5 characters",
-    "contentMaxLength": "Comment must be no more than 500 characters"
+    "contentMaxLength": "Comment must be no more than 500 characters",
+    "reply": "Reply",
+    "replyTo": "Reply to {author}",
+    "reactionFailed": "Reaction failed",
+    "reactionError": "An error occurred while processing your reaction. Please try again."
   }
 }

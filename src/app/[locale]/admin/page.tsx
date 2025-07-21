@@ -5,7 +5,9 @@ import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, FileText, Users, Settings, Loader2 } from 'lucide-react';
+import { Plus, FileText, Users, Settings, Loader2, BarChart3, MessageCircle } from 'lucide-react';
+import { AnalyticsDashboard } from '@/components/admin/analytics-dashboard';
+import { RecentComments } from '@/components/admin/recent-comments';
 import Link from 'next/link';
 
 export default function AdminDashboard() {
@@ -104,66 +106,26 @@ export default function AdminDashboard() {
         </Button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-3 mb-8">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Posts</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {stats.loading ? (
-                <Loader2 className="h-6 w-6 animate-spin" />
-              ) : (
-                stats.totalPosts
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              All posts in the system
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Published</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {stats.loading ? (
-                <Loader2 className="h-6 w-6 animate-spin" />
-              ) : (
-                stats.publishedPosts
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Live on your blog
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Drafts</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {stats.loading ? (
-                <Loader2 className="h-6 w-6 animate-spin" />
-              ) : (
-                stats.draftPosts
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Work in progress
-            </p>
-          </CardContent>
-        </Card>
+      {/* Analytics Dashboard */}
+      <div className="mb-8">
+        <div className="flex items-center gap-2 mb-4">
+          <BarChart3 className="h-5 w-5" />
+          <h2 className="text-xl font-semibold">Analytics Dashboard</h2>
+        </div>
+        <AnalyticsDashboard />
+      </div>
+
+      {/* Recent Comments Section */}
+      <div className="mb-8">
+        <div className="flex items-center gap-2 mb-4">
+          <MessageCircle className="h-5 w-5" />
+          <h2 className="text-xl font-semibold">Recent Activity</h2>
+        </div>
+        <RecentComments limit={5} showViewAll={true} />
       </div>
 
       {/* Quick Actions */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="hover:shadow-lg transition-shadow cursor-pointer">
           <Link href="/admin/posts">
             <CardHeader>
@@ -187,6 +149,20 @@ export default function AdminDashboard() {
               </CardTitle>
               <CardDescription>
                 Write and publish a new blog post
+              </CardDescription>
+            </CardHeader>
+          </Link>
+        </Card>
+
+        <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          <Link href="/admin/comments">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MessageCircle className="h-5 w-5" />
+                Manage Comments
+              </CardTitle>
+              <CardDescription>
+                Monitor and moderate all user comments
               </CardDescription>
             </CardHeader>
           </Link>

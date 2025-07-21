@@ -127,13 +127,14 @@ CREATE TABLE IF NOT EXISTS login_attempts (
     user_agent  TEXT
 );
 
--- Comments 테이블
+-- Comments 테이블 (중첩 댓글 지원)
 CREATE TABLE IF NOT EXISTS comments (
     id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     created_at  TIMESTAMPTZ DEFAULT now(),
     updated_at  TIMESTAMPTZ DEFAULT now(),
     deleted_at  TIMESTAMPTZ,
     post_id     UUID NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+    parent_id   UUID REFERENCES comments(id) ON DELETE CASCADE,
     content     TEXT NOT NULL,
     author_name VARCHAR(30) NOT NULL,
     ip_address  INET NOT NULL,
@@ -159,6 +160,29 @@ CREATE TABLE IF NOT EXISTS session_comments (
     expires_at      TIMESTAMPTZ NOT NULL,
     
     UNIQUE(session_id, comment_id)
+);
+
+-- Post Views 테이블 (조회수 추적)
+CREATE TABLE IF NOT EXISTS post_views (
+    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    created_at      TIMESTAMPTZ DEFAULT now(),
+    post_id         UUID NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+    ip_address      INET NOT NULL,
+    user_agent      TEXT,
+    session_id      VARCHAR(128),
+    
+    UNIQUE(post_id, ip_address, DATE(created_at))
+);
+
+-- Comment Reactions 테이블 (댓글 반응)
+CREATE TABLE IF NOT EXISTS comment_reactions (
+    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    created_at      TIMESTAMPTZ DEFAULT now(),
+    comment_id      UUID NOT NULL REFERENCES comments(id) ON DELETE CASCADE,
+    ip_address      INET NOT NULL,
+    reaction_type   VARCHAR(20) NOT NULL CHECK (reaction_type IN ('like', 'dislike')),
+    
+    UNIQUE(comment_id, ip_address)
 );
 
 /* ============================================================================
@@ -196,6 +220,9 @@ CREATE INDEX IF NOT EXISTS idx_login_attempts_created_at
 CREATE INDEX IF NOT EXISTS idx_comments_post_id
   ON comments(post_id);
 
+CREATE INDEX IF NOT EXISTS idx_comments_parent_id
+  ON comments(parent_id);
+
 CREATE INDEX IF NOT EXISTS idx_comments_created_at
   ON comments(created_at DESC);
 
@@ -212,6 +239,23 @@ CREATE INDEX IF NOT EXISTS idx_session_comments_session_id
 
 CREATE INDEX IF NOT EXISTS idx_session_comments_expires_at
   ON session_comments(expires_at);
+
+-- Post views 인덱스
+CREATE INDEX IF NOT EXISTS idx_post_views_post_id
+  ON post_views(post_id);
+
+CREATE INDEX IF NOT EXISTS idx_post_views_created_at
+  ON post_views(created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_post_views_ip_address
+  ON post_views(ip_address);
+
+-- Comment reactions 인덱스
+CREATE INDEX IF NOT EXISTS idx_comment_reactions_comment_id
+  ON comment_reactions(comment_id);
+
+CREATE INDEX IF NOT EXISTS idx_comment_reactions_ip_address
+  ON comment_reactions(ip_address);
 
 /* ============================================================================
    6. Triggers
@@ -306,6 +350,9 @@ ALTER TABLE security_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE login_attempts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE comment_rate_limits ENABLE ROW LEVEL SECURITY;
+ALTER TABLE session_comments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE post_views ENABLE ROW LEVEL SECURITY;
+ALTER TABLE comment_reactions ENABLE ROW LEVEL SECURITY;
 
 /* ============================================================================
    9. RLS Policies
@@ -388,6 +435,49 @@ CREATE POLICY comment_rate_limits_public_update
   ON comment_rate_limits FOR UPDATE
   USING (true);
 
+-- Session comments 정책
+CREATE POLICY session_comments_public_read
+  ON session_comments FOR SELECT
+  USING (true);
+
+CREATE POLICY session_comments_public_insert
+  ON session_comments FOR INSERT
+  WITH CHECK (true);
+
+CREATE POLICY session_comments_admin_full
+  ON session_comments FOR ALL
+  USING (is_admin());
+
+-- Post views 정책
+CREATE POLICY post_views_admin_read
+  ON post_views FOR SELECT
+  USING (is_admin());
+
+CREATE POLICY post_views_public_insert
+  ON post_views FOR INSERT
+  WITH CHECK (true);
+
+CREATE POLICY post_views_admin_full
+  ON post_views FOR ALL
+  USING (is_admin());
+
+-- Comment reactions 정책
+CREATE POLICY comment_reactions_public_read
+  ON comment_reactions FOR SELECT
+  USING (true);
+
+CREATE POLICY comment_reactions_public_insert
+  ON comment_reactions FOR INSERT
+  WITH CHECK (true);
+
+CREATE POLICY comment_reactions_public_update
+  ON comment_reactions FOR UPDATE
+  USING (true);
+
+CREATE POLICY comment_reactions_admin_full
+  ON comment_reactions FOR ALL
+  USING (is_admin());
+
 /* ============================================================================
    10. Function Permissions
    ============================================================================ */
@@ -433,15 +523,17 @@ ON CONFLICT (slug) DO NOTHING;
 DO $$
 BEGIN
   RAISE NOTICE '✅ Database setup completed successfully!';
-  RAISE NOTICE '📋 Created tables: admins, categories, tags, posts, post_tags, security_logs, login_attempts, comments, comment_rate_limits';
+  RAISE NOTICE '📋 Created tables: admins, categories, tags, posts, post_tags, security_logs, login_attempts, comments, comment_rate_limits, session_comments, post_views, comment_reactions';
   RAISE NOTICE '🔧 Functions: is_admin(), log_security_event(), log_login_attempt()';
   RAISE NOTICE '🛡️ RLS policies applied to all tables';
   RAISE NOTICE '📊 Initial data inserted for categories and tags';
-  RAISE NOTICE '💬 Comments system ready with rate limiting';
+  RAISE NOTICE '💬 Comments system ready with nested comments, reactions, and rate limiting';
+  RAISE NOTICE '📈 Post views tracking system ready';
   RAISE NOTICE '';
   RAISE NOTICE '🔑 Next steps:';
   RAISE NOTICE '   1. Add your admin user: INSERT INTO admins (user_id) VALUES (''your-uuid-here'');';
   RAISE NOTICE '   2. Test admin function: SELECT is_admin();';
   RAISE NOTICE '   3. Configure storage policies if needed';
-  RAISE NOTICE '   4. Test comments system with rate limiting';
+  RAISE NOTICE '   4. Test enhanced comments system with nested replies and reactions';
+  RAISE NOTICE '   5. Test post views tracking system';
 END $$;

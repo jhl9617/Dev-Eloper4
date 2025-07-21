@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MathCaptcha } from '@/components/blog/math-captcha';
-import { MessageCircle, Send, AlertCircle, CheckCircle } from 'lucide-react';
+import { MessageCircle, Send, AlertCircle, CheckCircle, Reply, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const createCommentSchema = (t: any) => z.object({
@@ -31,10 +31,13 @@ type CommentFormData = z.infer<ReturnType<typeof createCommentSchema>>;
 
 interface CommentFormProps {
   postId: string;
+  parentId?: string;
+  parentAuthor?: string;
   onCommentAdded?: (comment: any) => void;
+  onCancel?: () => void;
 }
 
-export function CommentForm({ postId, onCommentAdded }: CommentFormProps) {
+export function CommentForm({ postId, parentId, parentAuthor, onCommentAdded, onCancel }: CommentFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCaptcha, setShowCaptcha] = useState(false);
   const [captchaSessionId, setCaptchaSessionId] = useState<string | null>(null);
@@ -123,6 +126,7 @@ export function CommentForm({ postId, onCommentAdded }: CommentFormProps) {
           authorName: data.authorName,
           captchaSessionId,
           captchaAnswer,
+          parentId,
         }),
       });
 
@@ -160,9 +164,16 @@ export function CommentForm({ postId, onCommentAdded }: CommentFormProps) {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <MessageCircle className="w-5 h-5" />
-          {t('leaveComment')}
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {parentId ? <Reply className="w-5 h-5" /> : <MessageCircle className="w-5 h-5" />}
+            {parentId ? t('replyTo', { author: parentAuthor }) : t('leaveComment')}
+          </div>
+          {parentId && onCancel && (
+            <Button variant="ghost" size="sm" onClick={onCancel}>
+              <X className="w-4 h-4" />
+            </Button>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent>
