@@ -1,4 +1,5 @@
 import { createServerClient } from '@supabase/ssr'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import type { Database } from '@/types/database'
 
@@ -12,6 +13,18 @@ function validateEnvVars() {
   }
   
   return { url, key };
+}
+
+// Service role environment variable validation
+function validateServiceRoleEnvVars() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  
+  if (!url || !serviceKey) {
+    throw new Error('Missing required Supabase service role environment variables');
+  }
+  
+  return { url, serviceKey };
 }
 
 export async function createClient() {
@@ -61,4 +74,16 @@ export function createPublicClient() {
       },
     }
   )
+}
+
+// Create a service role client that bypasses RLS
+export function createServiceRoleClient() {
+  const { url, serviceKey } = validateServiceRoleEnvVars();
+  
+  return createSupabaseClient<Database>(url, serviceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  });
 }

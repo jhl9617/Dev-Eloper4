@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { createClient } from '@/lib/supabase/client';
 import { categorySchema, tagSchema, type CategoryFormData, type TagFormData } from '@/lib/validations/post';
 import { generateSlug } from '@/lib/utils/slug';
 import { useToast } from '@/hooks/use-toast';
@@ -60,7 +59,6 @@ export default function CategoriesPage() {
   
   const { toast } = useToast();
   const { user, isAdmin } = useAuth();
-  const supabase = createClient();
 
   const categoryForm = useForm<CategoryFormData>({
     resolver: zodResolver(categorySchema),
@@ -100,57 +98,34 @@ export default function CategoriesPage() {
     setLoading(true);
     
     try {
-      // Load categories with post count
-      const { data: categoriesData, error: categoriesError } = await supabase
-        .from('categories')
-        .select(`
-          *,
-          posts(count)
-        `)
-        .is('deleted_at', null)
-        .order('name');
+      // Load categories via API
+      const categoriesResponse = await fetch('/api/admin/categories');
+      const categoriesData = await categoriesResponse.json();
 
-      if (categoriesError) throw categoriesError;
+      if (!categoriesResponse.ok) {
+        throw new Error(categoriesData.error || 'Failed to load categories');
+      }
 
-      // Load tags with post count
-      const { data: tagsData, error: tagsError } = await supabase
-        .from('tags')
-        .select(`
-          *,
-          post_tags(count)
-        `)
-        .is('deleted_at', null)
-        .order('name');
+      // Load tags via API
+      const tagsResponse = await fetch('/api/admin/tags');
+      const tagsData = await tagsResponse.json();
 
-      if (tagsError) throw tagsError;
+      if (!tagsResponse.ok) {
+        throw new Error(tagsData.error || 'Failed to load tags');
+      }
 
-      // Transform data to include counts
-      const transformedCategories = categoriesData?.map(cat => ({
-        ...cat,
-        _count: {
-          posts: cat.posts?.length || 0
-        }
-      })) || [];
-
-      const transformedTags = tagsData?.map(tag => ({
-        ...tag,
-        _count: {
-          posts: tag.post_tags?.length || 0
-        }
-      })) || [];
-
-      setCategories(transformedCategories);
-      setTags(transformedTags);
+      setCategories(categoriesData);
+      setTags(tagsData);
     } catch (error) {
       console.error('Error loading data:', error);
       toast({
         variant: 'destructive',
-        description: 'Failed to load categories and tags.',
+        description: error instanceof Error ? error.message : 'Failed to load categories and tags.',
       });
     } finally {
       setLoading(false);
     }
-  }, [toast, supabase]);
+  }, [toast]);
 
   // Load data
   useEffect(() => {
@@ -161,44 +136,41 @@ export default function CategoriesPage() {
     setSubmitting(true);
 
     try {
-      // Check if slug already exists
-      const { data: existingCategory } = await supabase
-        .from('categories')
-        .select('id')
-        .eq('slug', data.slug)
-        .neq('id', editingCategory?.id || 0)
-        .is('deleted_at', null)
-        .single();
-
-      if (existingCategory) {
-        categoryForm.setError('slug', { message: 'This slug already exists' });
-        return;
-      }
-
+      let response;
+      
       if (editingCategory) {
         // Update existing category
-        const { error } = await supabase
-          .from('categories')
-          .update(data)
-          .eq('id', editingCategory.id);
-
-        if (error) throw error;
-
-        toast({
-          description: 'Category updated successfully!',
+        response = await fetch(`/api/admin/categories/${editingCategory.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
         });
       } else {
         // Create new category
-        const { error } = await supabase
-          .from('categories')
-          .insert([data]);
-
-        if (error) throw error;
-
-        toast({
-          description: 'Category created successfully!',
+        response = await fetch('/api/admin/categories', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
         });
       }
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        if (result.error === 'Slug already exists') {
+          categoryForm.setError('slug', { message: 'This slug already exists' });
+          return;
+        }
+        throw new Error(result.error || 'Failed to save category');
+      }
+
+      toast({
+        description: editingCategory ? 'Category updated successfully!' : 'Category created successfully!',
+      });
 
       setShowCategoryDialog(false);
       setEditingCategory(null);
@@ -208,7 +180,7 @@ export default function CategoriesPage() {
       console.error('Error saving category:', error);
       toast({
         variant: 'destructive',
-        description: 'Failed to save category. Please try again.',
+        description: error instanceof Error ? error.message : 'Failed to save category. Please try again.',
       });
     } finally {
       setSubmitting(false);
@@ -219,44 +191,41 @@ export default function CategoriesPage() {
     setSubmitting(true);
 
     try {
-      // Check if slug already exists
-      const { data: existingTag } = await supabase
-        .from('tags')
-        .select('id')
-        .eq('slug', data.slug)
-        .neq('id', editingTag?.id || 0)
-        .is('deleted_at', null)
-        .single();
-
-      if (existingTag) {
-        tagForm.setError('slug', { message: 'This slug already exists' });
-        return;
-      }
-
+      let response;
+      
       if (editingTag) {
         // Update existing tag
-        const { error } = await supabase
-          .from('tags')
-          .update(data)
-          .eq('id', editingTag.id);
-
-        if (error) throw error;
-
-        toast({
-          description: 'Tag updated successfully!',
+        response = await fetch(`/api/admin/tags/${editingTag.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
         });
       } else {
         // Create new tag
-        const { error } = await supabase
-          .from('tags')
-          .insert([data]);
-
-        if (error) throw error;
-
-        toast({
-          description: 'Tag created successfully!',
+        response = await fetch('/api/admin/tags', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
         });
       }
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        if (result.error === 'Slug already exists') {
+          tagForm.setError('slug', { message: 'This slug already exists' });
+          return;
+        }
+        throw new Error(result.error || 'Failed to save tag');
+      }
+
+      toast({
+        description: editingTag ? 'Tag updated successfully!' : 'Tag created successfully!',
+      });
 
       setShowTagDialog(false);
       setEditingTag(null);
@@ -266,7 +235,7 @@ export default function CategoriesPage() {
       console.error('Error saving tag:', error);
       toast({
         variant: 'destructive',
-        description: 'Failed to save tag. Please try again.',
+        description: error instanceof Error ? error.message : 'Failed to save tag. Please try again.',
       });
     } finally {
       setSubmitting(false);
@@ -287,12 +256,15 @@ export default function CategoriesPage() {
     }
 
     try {
-      const { error } = await supabase
-        .from('categories')
-        .update({ deleted_at: new Date().toISOString() })
-        .eq('id', category.id);
+      const response = await fetch(`/api/admin/categories/${category.id}`, {
+        method: 'DELETE',
+      });
 
-      if (error) throw error;
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to delete category');
+      }
 
       toast({
         description: 'Category deleted successfully!',
@@ -303,7 +275,7 @@ export default function CategoriesPage() {
       console.error('Error deleting category:', error);
       toast({
         variant: 'destructive',
-        description: 'Failed to delete category. Please try again.',
+        description: error instanceof Error ? error.message : 'Failed to delete category. Please try again.',
       });
     }
   };
@@ -322,12 +294,15 @@ export default function CategoriesPage() {
     }
 
     try {
-      const { error } = await supabase
-        .from('tags')
-        .update({ deleted_at: new Date().toISOString() })
-        .eq('id', tag.id);
+      const response = await fetch(`/api/admin/tags/${tag.id}`, {
+        method: 'DELETE',
+      });
 
-      if (error) throw error;
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to delete tag');
+      }
 
       toast({
         description: 'Tag deleted successfully!',
@@ -338,7 +313,7 @@ export default function CategoriesPage() {
       console.error('Error deleting tag:', error);
       toast({
         variant: 'destructive',
-        description: 'Failed to delete tag. Please try again.',
+        description: error instanceof Error ? error.message : 'Failed to delete tag. Please try again.',
       });
     }
   };
