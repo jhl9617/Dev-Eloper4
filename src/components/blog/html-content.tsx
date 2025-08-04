@@ -69,11 +69,17 @@ export function HtmlPreview({ content, maxLength = 150, className = '' }: HtmlPr
 
   useEffect(() => {
     if (isMounted && content) {
-      // Strip HTML tags and get text content for preview
+      // Strip HTML tags and decode HTML entities for preview
       const textContent = content.replace(/<[^>]*>/g, '');
-      const trimmedContent = textContent.length > maxLength 
-        ? textContent.slice(0, maxLength) + '...'
-        : textContent;
+      
+      // Decode HTML entities
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = textContent;
+      const decodedContent = tempDiv.textContent || tempDiv.innerText || '';
+      
+      const trimmedContent = decodedContent.length > maxLength 
+        ? decodedContent.slice(0, maxLength) + '...'
+        : decodedContent;
       
       setPreview(trimmedContent);
     }
