@@ -55,9 +55,9 @@ export const PostCard = memo(function PostCard({ post, priority = false, index =
       }}
       className="h-full"
     >
-      <Card className="h-full flex flex-col transition-all duration-500 hover:shadow-2xl hover:shadow-black/10 dark:hover:shadow-black/30 border-0 bg-white dark:bg-gray-900 hover:-translate-y-1 hover:scale-[1.02] group rounded-2xl overflow-hidden backdrop-blur-xl bg-white/90 dark:bg-gray-900/90">
-        {/* Thumbnail Section */}
-        <Link href={`/posts/${post.slug}`} className="block">
+      <Link href={`/posts/${post.slug}`} className="block h-full">
+        <Card className="h-full flex flex-col transition-all duration-500 hover:shadow-2xl hover:shadow-black/10 dark:hover:shadow-black/30 border-0 bg-white dark:bg-gray-900 hover:-translate-y-1 hover:scale-[1.02] group rounded-2xl overflow-hidden backdrop-blur-xl bg-white/90 dark:bg-gray-900/90 cursor-pointer">
+          {/* Thumbnail Section */}
           <div className="aspect-[16/9] overflow-hidden relative">
             {thumbnailUrl ? (
               <motion.div
@@ -82,74 +82,82 @@ export const PostCard = memo(function PostCard({ post, priority = false, index =
             {/* Overlay gradient */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
           </div>
-        </Link>
       
-      <CardHeader className="flex-1 p-6 pb-0">
-        <div className="space-y-4">
-          {post.category && (
-            <Link 
-              href={`/categories/${post.category.slug}`}
-              className="inline-block"
-            >
-              <MotionBadge variant="secondary" className="rounded-full px-3 py-1 text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 transition-all duration-300">
-                {post.category.name}
-              </MotionBadge>
-            </Link>
-          )}
-          
-          <Link href={`/posts/${post.slug}`} className="block group">
-            <motion.h3 
-              className="text-xl font-semibold line-clamp-2 group-hover:text-primary transition-all duration-300 leading-tight"
-              layoutId={`title-${post.id}`}
-            >
-              {post.title}
-            </motion.h3>
-          </Link>
-        </div>
-      </CardHeader>
+          <CardHeader className="flex-1 p-6 pb-0">
+            <div className="space-y-4">
+              {post.category && (
+                <div 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.location.href = `/categories/${post.category.slug}`;
+                  }}
+                  className="inline-block cursor-pointer"
+                >
+                  <MotionBadge variant="secondary" className="rounded-full px-3 py-1 text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 transition-all duration-300">
+                    {post.category.name}
+                  </MotionBadge>
+                </div>
+              )}
+              
+              <motion.h3 
+                className="text-xl font-semibold line-clamp-2 group-hover:text-primary transition-all duration-300 leading-tight"
+                layoutId={`title-${post.id}`}
+              >
+                {post.title}
+              </motion.h3>
+            </div>
+          </CardHeader>
 
-      <CardContent className="flex-1 px-6 py-4">
-        <Link href={`/posts/${post.slug}`} className="block group">
-          <HtmlPreview 
-            content={post.content}
-            maxLength={120}
-            className="line-clamp-3 text-gray-600 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200 transition-all duration-300 leading-relaxed"
-          />
-        </Link>
-      </CardContent>
+          <CardContent className="flex-1 px-6 py-4">
+            <HtmlPreview 
+              content={post.content}
+              maxLength={120}
+              className="line-clamp-3 text-gray-600 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200 transition-all duration-300 leading-relaxed"
+            />
+          </CardContent>
 
-      <CardFooter className="px-6 pb-6 pt-2">
-        {post.tags && post.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 w-full mb-4">
-            {post.tags.slice(0, 3).map((tag) => (
-              <Link key={tag.id} href={`/tags/${tag.slug}`}>
-                <MotionBadge variant="outline" className="text-xs rounded-full px-2 py-1 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-primary hover:text-primary transition-all duration-300">
-                  {tag.name}
-                </MotionBadge>
-              </Link>
-            ))}
-            {post.tags.length > 3 && (
-              <MotionBadge variant="outline" className="text-xs rounded-full px-2 py-1 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400">
-                +{post.tags.length - 3}
-              </MotionBadge>
+          <CardFooter className="px-6 pb-6 pt-2">
+            {post.tags && post.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 w-full mb-4">
+                {post.tags.slice(0, 3).map((tag) => (
+                  <div
+                    key={tag.id}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      window.location.href = `/tags/${tag.slug}`;
+                    }}
+                    className="cursor-pointer"
+                  >
+                    <MotionBadge variant="outline" className="text-xs rounded-full px-2 py-1 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-primary hover:text-primary transition-all duration-300">
+                      {tag.name}
+                    </MotionBadge>
+                  </div>
+                ))}
+                {post.tags.length > 3 && (
+                  <MotionBadge variant="outline" className="text-xs rounded-full px-2 py-1 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400">
+                    +{post.tags.length - 3}
+                  </MotionBadge>
+                )}
+              </div>
             )}
-          </div>
-        )}
 
-        <div className="flex items-center justify-between w-full text-sm text-gray-500 dark:text-gray-400">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <CalendarDays className="h-4 w-4" />
-              <span className="font-medium">{format(publishedDate, 'MMM dd, yyyy')}</span>
+            <div className="flex items-center justify-between w-full text-sm text-gray-500 dark:text-gray-400">
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <CalendarDays className="h-4 w-4" />
+                  <span className="font-medium">{format(publishedDate, 'MMM dd, yyyy')}</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Clock className="h-4 w-4" />
+                  <span className="font-medium">{t('readingTime', { minutes: readingTime })}</span>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <Clock className="h-4 w-4" />
-              <span className="font-medium">{t('readingTime', { minutes: readingTime })}</span>
-            </div>
-          </div>
-        </div>
-      </CardFooter>
-      </Card>
+          </CardFooter>
+        </Card>
+      </Link>
     </motion.div>
   );
 });
