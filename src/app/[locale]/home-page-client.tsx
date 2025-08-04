@@ -29,12 +29,12 @@ export function HomePageClient({ posts, total, translations }: HomePageClientPro
       animate="animate"
       exit="exit"
     >
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-background to-gray-50 dark:to-gray-900 py-20 lg:py-32">
+      {/* Compact Hero Section */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-background to-gray-50 dark:to-gray-900 py-12 lg:py-16">
         <div className="container px-6 lg:px-8">
           <div className="mx-auto max-w-4xl text-center">
             <motion.h1 
-              className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl"
+              className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl lg:text-6xl"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
@@ -48,52 +48,32 @@ export function HomePageClient({ posts, total, translations }: HomePageClientPro
               </span>
             </motion.h1>
             <motion.p 
-              className="mx-auto mt-8 max-w-2xl text-lg sm:text-xl md:text-2xl text-gray-600 dark:text-gray-400 leading-relaxed"
+              className="mx-auto mt-6 max-w-2xl text-base sm:text-lg text-gray-600 dark:text-gray-400"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             >
-              Discover articles about web development, programming, and technology. 
-              Stay updated with the latest trends and best practices.
+              Web development, programming, and technology insights
             </motion.p>
           </div>
-          <motion.div 
-            className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <MotionButton asChild size="lg" className="rounded-full px-8 py-4 text-base font-medium shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300">
-              <Link href="/posts">
-                <BookOpen className="mr-2 h-5 w-5" />
-                {translations.allPosts}
-              </Link>
-            </MotionButton>
-            <MotionButton variant="outline" size="lg" asChild className="rounded-full px-8 py-4 text-base font-medium border-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-300">
-              <Link href="/categories">
-                {translations.categories}
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </MotionButton>
-          </motion.div>
         </div>
       </section>
 
       {/* Latest Posts Section */}
-      <section className="py-20 lg:py-24 bg-background">
+      <section className="py-12 lg:py-16 bg-background">
         <div className="container px-6 lg:px-8">
           <div className="mx-auto max-w-7xl">
-            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between mb-16">
-              <div className="space-y-4">
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">
+            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between mb-12">
+              <div className="space-y-3">
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">
                   {translations.recentPosts}
                 </h2>
-                <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl">
-                  Explore our latest articles and insights on web development, programming best practices, and cutting-edge technology trends.
+                <p className="text-base text-gray-600 dark:text-gray-400 max-w-2xl">
+                  Latest articles and insights on web development and technology
                 </p>
               </div>
               {total > 6 && (
-                <Button variant="outline" asChild className="mt-6 lg:mt-0 rounded-full px-6 py-3 font-medium border-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-300">
+                <Button variant="outline" asChild className="mt-4 lg:mt-0 rounded-full px-6 py-3 font-medium border-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-300">
                   <Link href="/posts">
                     {translations.allPosts}
                     <ArrowRight className="ml-2 h-4 w-4" />
@@ -137,23 +117,23 @@ export function HomePageClient({ posts, total, translations }: HomePageClientPro
         </div>
       </section>
 
-      {/* Newsletter/CTA Section */}
-      <section className="py-20 lg:py-24 bg-gradient-to-b from-gray-50 to-background dark:from-gray-900 dark:to-background">
+      {/* Compact CTA Section */}
+      <section className="py-12 lg:py-16 bg-gradient-to-b from-gray-50 to-background dark:from-gray-900 dark:to-background">
         <div className="container px-6 lg:px-8">
-          <div className="mx-auto max-w-4xl text-center">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-6">
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-4">
               Stay Updated
             </h2>
-            <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 mb-12 max-w-2xl mx-auto">
-              Follow us for the latest articles and insights in web development, programming best practices, and technology trends.
+            <p className="text-base text-gray-600 dark:text-gray-400 mb-8 max-w-xl mx-auto">
+              Follow for the latest in web development and technology
             </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button variant="outline" asChild className="rounded-full px-8 py-4 text-base font-medium border-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-300">
+            <div className="flex flex-col sm:flex-row justify-center gap-3">
+              <Button variant="outline" asChild className="rounded-full px-6 py-3 text-sm font-medium border-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-300">
                 <Link href="/rss">
                   RSS Feed
                 </Link>
               </Button>
-              <Button variant="outline" asChild className="rounded-full px-8 py-4 text-base font-medium border-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-300">
+              <Button variant="outline" asChild className="rounded-full px-6 py-3 text-sm font-medium border-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-300">
                 <Link href="/about">
                   {translations.about}
                 </Link>
