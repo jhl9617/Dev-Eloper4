@@ -42,12 +42,6 @@ export function PostHeader({ post }: PostHeaderProps) {
         {post.title}
       </h1>
 
-      {/* Content Preview */}
-      {post.content && (
-        <p className="text-xl text-muted-foreground leading-relaxed">
-          {post.content.replace(/<[^>]*>/g, '').substring(0, 200) + (post.content.replace(/<[^>]*>/g, '').length > 200 ? '...' : '')}
-        </p>
-      )}
 
       {/* Cover Image */}
       {post.cover_image_path && (

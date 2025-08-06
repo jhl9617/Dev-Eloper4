@@ -47,8 +47,13 @@ export function HtmlContent({ content, className = '' }: HtmlContentProps) {
 
   return (
     <div 
-      className={`html-content prose prose-lg max-w-none dark:prose-invert ${className}`}
+      className={`html-content prose prose-xl max-w-none dark:prose-invert ${className}`}
       dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+      style={{
+        fontSize: '1.125rem',
+        lineHeight: '1.8',
+        letterSpacing: '0.01em',
+      }}
     />
   );
 }

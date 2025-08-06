@@ -1,12 +1,12 @@
 import './globals.css';
 import 'highlight.js/styles/github.css';
-import { Inter, JetBrains_Mono } from 'next/font/google';
+import { Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
 
-const inter = Inter({
-  variable: '--font-inter',
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: '--font-plus-jakarta-sans',
   subsets: ['latin'],
   display: 'swap',
-  weight: ['300', '400', '500', '600', '700'],
+  weight: ['300', '400', '500', '600', '700', '800'],
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -22,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html suppressHydrationWarning>
-      <body className={`${inter.variable} ${jetbrainsMono.variable} antialiased min-h-screen flex flex-col font-sans`}>
+      <body className={`${plusJakartaSans.variable} ${jetbrainsMono.variable} antialiased min-h-screen flex flex-col font-sans`}>
         {children}
       </body>
     </html>

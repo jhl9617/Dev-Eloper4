@@ -187,7 +187,7 @@ export default function NewPostPage() {
   }
 
   return (
-    <div className="container py-8 max-w-4xl">
+    <div className="container py-8 max-w-7xl">
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Create New Post</h1>
         <p className="text-muted-foreground">
@@ -196,9 +196,9 @@ export default function NewPostPage() {
       </div>
 
       <Form {...form}>
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-6 lg:grid-cols-4">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-3 space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Post Content</CardTitle>

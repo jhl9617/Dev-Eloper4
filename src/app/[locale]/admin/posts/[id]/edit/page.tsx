@@ -330,7 +330,7 @@ export default function EditPostPage() {
   }
 
   return (
-    <div className="container py-8 max-w-4xl">
+    <div className="container py-8 max-w-7xl">
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -364,9 +364,9 @@ export default function EditPostPage() {
       </div>
 
       <Form {...form}>
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-6 lg:grid-cols-4">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-3 space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Post Content</CardTitle>

@@ -167,7 +167,7 @@ CREATE TABLE IF NOT EXISTS post_views (
     id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     created_at      TIMESTAMPTZ DEFAULT now(),
     post_id         UUID NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
-    ip_address      INET NOT NULL,
+    ip_address      INET NOT NULL,  -- Back to INET for real IP addresses
     user_agent      TEXT,
     session_id      VARCHAR(128),
     

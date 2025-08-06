@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { headers } from 'next/headers';
-import { hashIpAddress, getClientIpAddress } from '@/lib/ip-hash';
+import { getClientIpAddress } from '@/lib/ip-hash';
 
 export async function POST(
   request: NextRequest,
@@ -14,7 +14,6 @@ export async function POST(
     // Get IP address and user agent
     const headersList = await headers();
     const ip = getClientIpAddress(headersList);
-    const hashedIp = hashIpAddress(ip);
     const userAgent = headersList.get('user-agent') || '';
 
     // Get session ID from request (if provided)
@@ -25,7 +24,7 @@ export async function POST(
       .from('post_views')
       .insert({
         post_id: postId,
-        ip_address: hashedIp,
+        ip_address: ip,  // Use original IP address instead of hash
         user_agent: userAgent,
         session_id: sessionId,
       });
